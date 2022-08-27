@@ -33,13 +33,9 @@
 
 ## 运行环境
 
-通过web界面，在本地环境时，提供了维护运行环境的能力。运行环境通过启动命令时的自定义参数来支持。如下示例:
+通过web界面，在本地环境时，提供了维护运行环境的能力。运行环境通过在config目录下建立符号链接active来支持。有效的运行环境在config/runtime.json中定义。这一设定是考虑由web ui来维护运行环境。在config/{mode}/opts.json中添加对应的[fastify启动配置]([https://www.fastify.io/docs/latest/Reference/Server/)
 
-```console
-NODE_ENV=development fastify start app.js -- --mode=local
-```
-
-其中local为默认的本地环境，可以不传。其它有效的运行环境在config/runtime.json中定义。并且启动命令自动维护，无需手动处理。在config/{mode}/opts.json中添加对应的[fastify启动配置]([https://www.fastify.io/docs/latest/Reference/Server/)
+**😄 注意，默认配置，config目录不会保存到git中。这里有可能保存了key,cert等敏感文件。**
 
 # 在pv-fasitfy引入的插件
 
