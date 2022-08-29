@@ -3,8 +3,52 @@
 const path = require('path')
 const AutoLoad = require('@fastify/autoload')
 
+process.env.NODE_CONFIG_DIR = process.env.NODE_CONFIG_DIR || path.join(__dirname, 'config', 'active')
+const config = require("config")
+
 module.exports = async function (fastify, opts) {
   // Place here your custom code!
+  const _ = require('lodash')
+
+  fastify.decorate('_', _)
+
+  fastify.decorate('config', config)
+
+  // fastify.addHook('onClose',()=>{
+  //   fastify.decorate('_', null)
+  //   fastify.decorate('config', null)
+  // })
+
+  _.set(config, 'util.isLocal', () => {
+    if (!config.has('env.local')) {
+      return false
+    }
+    return !!config.get('env.local')
+  })
+
+  function contain(propPath, chkValue) {
+    if (!propPath || !_.isString(propPath)) {
+      return false
+    }
+    // console.log(11, propPath)
+    if (!config.has(propPath)) {
+      return false
+    }
+    const container = config.get(propPath)
+    return (_.isArrayLike(container) && _.indexOf(container, chkValue) >= 0)
+  }
+  // console.log(111)
+  _.set(config, 'util.contain', contain)
+  _.set(config, 'util.isPluginDisable', _.bind(contain, null, 'env.disabled-plugins'))
+  _.set(config, 'util.isPluginEnable', _.bind(contain, null, 'env.enabled-plugins'))
+  // console.log("config", config.util.isPluginEnable('testa'))
+
+  //响应pm2的shutdown消息，清理环境，友好退出。
+  process.on('message', msg => {
+    if (msg === 'shutdown') {
+      fastify.close()
+    }
+  })
 
   // Do not touch the following lines
 
@@ -24,4 +68,4 @@ module.exports = async function (fastify, opts) {
   })
 }
 
-module.exports.options = require('./config/active/opts.json')
+module.exports.options = config.has('fastify') ? config.get('fastify') : {}

@@ -6,5 +6,6 @@ const fp = require('fastify-plugin')
 // to export the decorators to the outer scope
 
 module.exports = fp(async function (fastify, opts) {
-  fastify.register(require('pv-fastify'), opts)
+  // console.log(fastify.log)
+  // fastify.register(require('pv-fastify'), opts)
 })
