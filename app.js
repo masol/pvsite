@@ -30,18 +30,26 @@ module.exports = async function (fastify, opts) {
     if (!propPath || !_.isString(propPath)) {
       return false
     }
-    // console.log(11, propPath)
     if (!config.has(propPath)) {
       return false
     }
     const container = config.get(propPath)
     return (_.isArrayLike(container) && _.indexOf(container, chkValue) >= 0)
   }
-  // console.log(111)
   _.set(config, 'util.contain', contain)
-  _.set(config, 'util.isPluginDisable', _.bind(contain, null, 'env.disabled-plugins'))
-  _.set(config, 'util.isPluginEnable', _.bind(contain, null, 'env.enabled-plugins'))
-  // console.log("config", config.util.isPluginEnable('testa'))
+  _.set(config, 'util.dget', (propPath, defValue = {}) => {
+    if (!propPath || !_.isString(propPath)) {
+      return defValue
+    }
+    return config.has(propPath) ? config.get(propPath) : defValue
+  })
+  _.set(config, 'util.isPluginDisabled', _.bind(contain, null, 'env.disabled-plugins'))
+  _.set(config, 'util.isPluginEnabled', _.bind(contain, null, 'env.enabled-plugins'))
+  const base = process.cwd()
+  _.set(config, 'util.path', (...args) => {
+    let newarg = [base, ...Array.from(args)]
+    return path.join.apply(null, newarg)
+  })
 
   //响应pm2的shutdown消息，清理环境，友好退出。
   process.on('message', msg => {
