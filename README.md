@@ -11,9 +11,12 @@
   - [相关性](#相关性)
   - [运行环境](#运行环境)
     - [集群管理](#集群管理)
-- [在pv-fasitfy引入的插件](#在pv-fasitfy引入的插件)
-  - [默认关闭的插件](#默认关闭的插件)
-  - [默认启用的插件](#默认启用的插件)
+- [在pv-fasitfy引入的插件及特性](#在pv-fasitfy引入的插件及特性)
+  - [默认关闭](#默认关闭)
+    - [插件](#插件)
+    - [特性](#特性)
+  - [默认启用](#默认启用)
+    - [插件](#插件-1)
 - [配置说明](#配置说明)
 - [decorate说明](#decorate说明)
 
@@ -64,13 +67,24 @@
 
 &emsp;&emsp;集群管理使用[consul](https://github.com/hashicorp/consul),并在node环境下使用[node-consul](https://github.com/silas/node-consul)。集群管理只在集群环境下创建，运行环境切换到多机/多中心时，自动引入。
 
-# 在pv-fasitfy引入的插件
+# 在pv-fasitfy引入的插件及特性
+&emsp;&emsp;引入的插件及特性共用一个enabled/disabled配置。
 
-## 默认关闭的插件
+## 默认关闭
+
+### 插件
 - [static](https://github.com/fastify/fastify-static) : 静态资源在开发环境下存放在pubroot目录下。其它环境由环境自行定义。代码中引入必须在compress插件之前。注意引入的插件也会暴露静态资源。列表如下：
 - [rate-limit](https://github.com/fastify/fastify-rate-limit): 对全局或指定请求限速。
+### 特性
+- [docker](https://github.com/apocas/dockerode): 为isLocal引入Dockerode类及docker对象,本地环境下强制开启。
+- [docker-compose](https://github.com/apocas/dockerode-compose): 为isLocal引入DockerodeCompose类及compose对象,本地环境下强制开启。
+- [docker-modem](https://github.com/apocas/docker-modem): 为isLocal引入DockerodeModem类及modem对象。
+- [vault](https://github.com/nodevault/node-vault): 在nodejs环境中与[hashi vault](https://www.hashicorp.com/)交互的库。使用UI配置时，非本地环境默认开启。
 
-## 默认启用的插件
+
+## 默认启用
+
+### 插件
 - [cors](https://github.com/fastify/fastify-cors) : 引入cors支持。默认origin为false.
 - [circuit-breaker](https://github.com/fastify/fastify-circuit-breaker) : 引入断路器支持。如果需要，请在route级设置onCircuitOpen，onTimeout。
 - [accepts](https://github.com/fastify/fastify-accepts) : 支持与客户端的格式协商。
@@ -78,7 +92,7 @@
 
 # 配置说明
 
-当前激活的配置文件存放在目录config/active/default.XXX中。其定义如下:
+&emsp;&emsp;当前激活的配置文件存放在目录config/active/default.XXX中。在运行期代码并未维护配置之间的相关性，如果某个依赖服务未就绪，直接报错。在admin的UI代码中维护配置的相关性。可配置内容如下:
 - fastify: 保存[fastify启动配置](https://www.fastify.io/docs/latest/Reference/Server/#factory)。
   - logger: logger的可配置项，参考[pino配置对象](https://github.com/pinojs/pino/blob/master/docs/api.md#options-object)。pv-fastify允许logger值为字符串，此时其指向了logger对象定义模块,空为'./logger.js',pino的log系列方法的message格式，采用%s,%d,%o占位方式，[参考其文档](https://github.com/pinojs/pino/blob/master/docs/api.md#message)。
 
@@ -98,6 +112,9 @@
 - rate-limit: 参考[限速配置](https://github.com/fastify/fastify-rate-limit#options)了解这里允许的内容。
 - compress: 参考[压缩配置](https://github.com/fastify/fastify-compress#compress-options)。
 - static: 参考[静态资源](https://github.com/fastify/fastify-static#options)配置项。
+- docker: 参考[使用dockerode](https://github.com/apocas/dockerode#usage)了解允许的配置项。
+- docker-modem: 参考[使用docker-modem](https://github.com/apocas/docker-modem#getting-started)
+- vault : [node-vault配置项](https://github.com/nodevault/node-vault#init-and-unseal)。
 - db: 保存了database配置.
 
   
@@ -109,7 +126,15 @@
   - util.path(string...): [string]返回参数构建的基于运行目录的目录。传入空，返回运行目录。
   - util.dget(path,def={}): 获取指定路径的配置，如果不存在，则返回def.
   - util.contain(string,string) : 给定属性路径下，如果是一个数组，是否包含指定的值。
-  - util.isPluginDisabled(string) : [boolean]指定的内建插件是否被配置禁用了，不配置默认是启用的。
-  - util.isPluginEnabled(string) : [boolean]指定的内建推荐插件是否被配置允许了，不配置默认是禁用的。
+  - util.isDisabled(string) : [boolean]指定的插件或特性是否被配置禁用了，不配置默认是启用的。
+  - util.isEnabled(string) : [boolean]指定的插件或特性是否被配置允许了，不配置默认是禁用的。
+- sco : (service configuration objects)根据配置引入的对象，通常使用前需要检查是否有效。
+  - Dockerode : docerode引入的类，如果docker被允许(本地环境或启用了Docker插件)
+  - docker : 按照默认配置加载的docker实例。
+  - DockerodeCompose: dockerode-compose引入的类。[后续用法](https://github.com/apocas/dockerode-compose#getting-started)
+  - DockerodeModem: dockerode-modem[引入的类](https://github.com/apocas/docker-modem#getting-started)。
+  - modem: 按照配置创建的modem实例。
+  - static : fastify-static插件对象，用于后续的静态路径配置。如果本地或static被启用。
+  - vault : [node-vault对象](https://github.com/nodevault/node-vault#usage)。如果vault被启用。
 
 
