@@ -77,7 +77,7 @@
 - [rate-limit](https://github.com/fastify/fastify-rate-limit): 对全局或指定请求限速。
 ### 特性
 - [docker](https://github.com/apocas/dockerode): 为isLocal引入Dockerode类及docker对象,本地环境下强制开启。
-- [docker-compose](https://github.com/apocas/dockerode-compose): 为isLocal引入DockerodeCompose类及compose对象,本地环境下强制开启。
+- [docker-compose](https://github.com/apocas/dockerode-compose): 为isLocal引入DockerodeCompose类及compose对象。
 - [docker-modem](https://github.com/apocas/docker-modem): 为isLocal引入DockerodeModem类及modem对象。
 - [vault](https://github.com/nodevault/node-vault): 在nodejs环境中与[hashi vault](https://www.hashicorp.com/)交互的库。使用UI配置时，非本地环境默认开启。
 
@@ -89,6 +89,8 @@
 - [circuit-breaker](https://github.com/fastify/fastify-circuit-breaker) : 引入断路器支持。如果需要，请在route级设置onCircuitOpen，onTimeout。
 - [accepts](https://github.com/fastify/fastify-accepts) : 支持与客户端的格式协商。
 - [compress](https://github.com/fastify/fastify-compress) : 支持回应压缩格式。
+- [crypto-random](https://github.com/sindresorhus/crypto-random-string) : 支持sco.cryptoRandom
+- [promise-retry](https://github.com/publiosilva/delayed-promise-retry) : 失败时延迟重试一个Promise.
 
 # 配置说明
 
@@ -117,7 +119,6 @@
 - vault : [node-vault配置项](https://github.com/nodevault/node-vault#init-and-unseal)。
 - db: 保存了database配置.
 
-  
 # decorate说明
 
 - _ : lodash对象
@@ -136,5 +137,5 @@
   - modem: 按照配置创建的modem实例。
   - static : fastify-static插件对象，用于后续的静态路径配置。如果本地或static被启用。
   - vault : [node-vault对象](https://github.com/nodevault/node-vault#usage)。如果vault被启用。
-
-
+  - cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/crypto-random-string)
+  - promisRetry: 扩展增加了[https://github.com/publiosilva/delayed-promise-retry#custom-delay]延迟重试函数.可以有两或三个参数.
