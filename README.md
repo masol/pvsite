@@ -138,4 +138,4 @@
   - static : fastify-static插件对象，用于后续的静态路径配置。如果本地或static被启用。
   - vault : [node-vault对象](https://github.com/nodevault/node-vault#usage)。如果vault被启用。
   - cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/crypto-random-string)
-  - promisRetry: 扩展增加了[https://github.com/publiosilva/delayed-promise-retry#custom-delay]延迟重试函数.可以有两或三个参数.
+  - promisRetry: 扩展增加了[promise函数失败重试](https://github.com/publiosilva/delayed-promise-retry#custom-delay)延迟重试函数.可以有两或三个参数.
