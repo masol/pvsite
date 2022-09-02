@@ -647,6 +647,11 @@ bind-obj-methods@^3.0.0:
   resolved "https://registry.npmmirror.com/bind-obj-methods/-/bind-obj-methods-3.0.0.tgz#65b66544d9d668d80dfefe2089dd347ad1dbcaed"
   integrity sha512-nLEaaz3/sEzNSyPWRsN9HNsqwk1AUyECtGj+XwGdIi3xABnEqecvXtIJ0wehQXuuER5uZ/5fTs2usONgYjG+iw==
 
+blend-promise-utils@^1.29.0:
+  version "1.29.0"
+  resolved "https://registry.npmmirror.com/blend-promise-utils/-/blend-promise-utils-1.29.0.tgz#2875d326bad854eccfa191492f3d7c28716e1385"
+  integrity sha512-3jHnIhktLsczp/rKtufR8x/pVkm0EXwE1nt/h+XPPk/xooYGv4ymvGubLw6eaf8bSQMUxTbG5seWwSHAy56sIw==
+
 brace-expansion@^1.1.7:
   version "1.1.11"
   resolved "https://registry.npmmirror.com/brace-expansion/-/brace-expansion-1.1.11.tgz#3c7fcbf529d87226f3d2f52b966ff5271eb441dd"

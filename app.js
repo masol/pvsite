@@ -2,6 +2,7 @@
 
 const path = require('path')
 const AutoLoad = require('@fastify/autoload')
+const promiseUtils = require('blend-promise-utils')
 
 process.env.NODE_CONFIG_DIR = process.env.NODE_CONFIG_DIR || path.join(__dirname, 'config', 'active')
 const config = require('config')
@@ -11,6 +12,7 @@ module.exports = async function (fastify, opts) {
   const _ = require('lodash')
 
   fastify.decorate('_', _)
+  fastify.decorate('$', promiseUtils)
   fastify.decorate('config', config)
 
   const sco = {}

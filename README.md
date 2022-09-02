@@ -17,6 +17,7 @@
     - [特性](#特性)
   - [默认启用](#默认启用)
     - [插件](#插件-1)
+    - [特性](#特性-1)
 - [配置说明](#配置说明)
 - [decorate说明](#decorate说明)
 
@@ -83,27 +84,27 @@
 ## 默认关闭
 
 ### 插件
-
 - [static](https://github.com/fastify/fastify-static) : 静态资源在开发环境下存放在pubroot目录下。其它环境由环境自行定义。代码中引入必须在compress插件之前。注意引入的插件也会暴露静态资源。列表如下：
 - [rate-limit](https://github.com/fastify/fastify-rate-limit): 对全局或指定请求限速。
 
 ### 特性
-
 - [docker](https://github.com/apocas/dockerode): 为isLocal引入Dockerode类及docker对象,本地环境下强制开启。
 - [docker-compose](https://github.com/apocas/dockerode-compose): 为isLocal引入DockerodeCompose类及compose对象。
 - [docker-modem](https://github.com/apocas/docker-modem): 为isLocal引入DockerodeModem类及modem对象。
 - [vault](https://github.com/nodevault/node-vault): 在nodejs环境中与[hashi vault](https://www.hashicorp.com/)交互的库。使用UI配置时，非本地环境默认开启。
+- [elastic](https://www.elastic.co/): 在nodejs环境中与elasticsearch通信的支持，本地环境下强制开启。
+- [zinc](https://zincsearch.com/): 使用zinsearch执行全文检索。
 
 ## 默认启用
 
 ### 插件
-
 - [cors](https://github.com/fastify/fastify-cors) : 引入cors支持。默认origin为false.
 - [circuit-breaker](https://github.com/fastify/fastify-circuit-breaker) : 引入断路器支持。如果需要，请在route级设置onCircuitOpen，onTimeout。
 - [accepts](https://github.com/fastify/fastify-accepts) : 支持与客户端的格式协商。
 - [compress](https://github.com/fastify/fastify-compress) : 支持回应压缩格式。
+
+### 特性
 - [crypto-random](https://github.com/sindresorhus/crypto-random-string) : 支持sco.cryptoRandom
-- [promise-retry](https://github.com/publiosilva/delayed-promise-retry) : 失败时延迟重试一个Promise.
 
 # 配置说明
 
@@ -112,11 +113,12 @@
 - fastify: 保存[fastify启动配置](https://www.fastify.io/docs/latest/Reference/Server/#factory)。
   
   - logger: logger的可配置项，参考[pino配置对象](https://github.com/pinojs/pino/blob/master/docs/api.md#options-object)。pv-fastify允许logger值为字符串，此时其指向了logger对象定义模块,空为'./logger.js',pino的log系列方法的message格式，采用%s,%d,%o占位方式，[参考其文档](https://github.com/pinojs/pino/blob/master/docs/api.md#message)。
-    
+
     ```json
     "fastify" : {
     }
     ```
+
 - env: 定义了运行环境。
   
   - name: [string] 运行环境人读名称。
@@ -132,11 +134,13 @@
 - docker: 参考[使用dockerode](https://github.com/apocas/dockerode#usage)了解允许的配置项。
 - docker-modem: 参考[使用docker-modem](https://github.com/apocas/docker-modem#getting-started)
 - vault : [node-vault配置项](https://github.com/nodevault/node-vault#init-and-unseal)。
+- elastic: [elastic配置](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-configuration.html)。如果使用docker,通常桌面版的max_map_count不足，临时修改的指令:`sudo sysctl -w vm.max_map_count=262144`。长期生效，修改文件`/etc/sysctl.conf`，在其中添加`vm.max_map_count=262144`
 - db: 保存了database配置.
 
 # decorate说明
 
-- _ : lodash对象
+- _ : [lodash对象](https://lodash.com/) : 被内建添加，不能移除。内部代码依赖lodash.
+- $ : [promise-utils对象](https://github.com/blend/promise-utils) : 被内建支持，不能移除。内部代码依赖此库。
 - config: node-config加载的对象，除了加载的配置,额外扩展了如下函数([cofing的内建函数](https://github.com/node-config/node-config/wiki/Using-Config-Utilities)):
   - util.isLocal() : [boolean]是否处于本地模式,以允许编辑模式。
   - util.path(string...): [string]返回参数构建的基于运行目录的目录。传入空，返回运行目录。
@@ -153,5 +157,6 @@
   - static : fastify-static插件对象，用于后续的静态路径配置。如果本地或static被启用。
   - vault : [node-vault对象](https://github.com/nodevault/node-vault#usage)。如果vault被启用。
   - cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/crypto-random-string)
-  - promisRetry: 扩展增加了[promise函数失败重试](https://github.com/publiosilva/delayed-promise-retry#custom-delay)延迟重试函数.可以有两或三个参数.
+  - elastic: 如果elastic被支持，则指向了[nodejs sdk intance](https://github.com/elastic/elasticsearch-js)
+  - Elastic: 如果elastic被支持，则指向了Elastic Client类。
 
