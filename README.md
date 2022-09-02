@@ -34,6 +34,12 @@
     - default.json 默认项目配置。
     - :sweat_drops: *production.json* 可选: 产品环境下的覆盖项。
     - :sweat_drops: *development* 可选: 开发环境下的覆盖项。
+    - elastic: elastic的本地目录
+      - http_ca.crt: tls所需的证书。本地启动时自动从docer中获取。
+      - passwd: elastic用户的密码，本地启动自动调用reset来获取最新。
+      - volumes: 存放elastic的数据.
+        - data: elastic的数据。
+        - logs: elastic的日志。
     - vault vault的本地目录.
       - ~~docker-compose.yml 启动vault service的docker compose配置,已废弃.~~
       - root.key 如果自动初始化,则这里保存了root key.用于vault解封.
