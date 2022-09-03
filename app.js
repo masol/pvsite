@@ -15,6 +15,11 @@ module.exports = async function (fastify, opts) {
   fastify.decorate('$', promiseUtils)
   fastify.decorate('config', config)
 
+  // 在prodvest包中覆盖此实现。
+  const dummy = () => { return null }
+  const soa = { get: dummy, reg: dummy }
+  fastify.decorate('soa', soa)
+
   const sco = {}
   fastify.decorate('sco', sco)
 

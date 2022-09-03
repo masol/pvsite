@@ -2,15 +2,16 @@
 
 *品研网官方网站，也作为其它组件的测试站点，以自举项目*
 
-# 目录
+<h1>目录</h1>
 
-- [目录](#目录)
-- [目录结构](#目录结构)
-  - [根目录](#根目录)
+- [使用说明](#使用说明)
 - [主要概念](#主要概念)
   - [相关性](#相关性)
+  - [面向服务(SOA)](#面向服务soa)
   - [运行环境](#运行环境)
-    - [集群管理](#集群管理)
+    - [环境管理](#环境管理)
+- [目录结构](#目录结构)
+  - [根目录](#根目录)
 - [在pv-fasitfy引入的插件及特性](#在pv-fasitfy引入的插件及特性)
   - [默认关闭](#默认关闭)
     - [插件](#插件)
@@ -20,6 +21,70 @@
     - [特性](#特性-1)
 - [配置说明](#配置说明)
 - [decorate说明](#decorate说明)
+- [服务列表](#服务列表)
+
+# 使用说明
+&emsp;&emsp;如果不修改AI创建的代码，不需要开发知识。但是不修改是不可能的。因此，品研从V2开始，假定使用者为程序员。抛弃了V1为领域专家准备的修改UI——如果想支持全部修改，工作量过于浩大了。
+&emsp;&emsp;使用方式，安装npm，docker环境。并提前docker pull下列image:
+- elasticsearch:8.4.1
+- vault:latest
+
+&emsp;&emsp;使用命令`npm create prodvest`来创建自己项目的框架代码。或从品研官网(www.munao.cc)中下载框架代码包。
+&emsp;&emsp;在代码根目录下执行:
+- `npm run start`: 本地产品模式。
+- `npm run dev`: 本地开发模式。
+
+&emsp;&emsp;在浏览器中访问[http://127.0.0.1:3000/admin](http://127.0.0.1:3000/admin)。如果首次运行，按照提示创建管理用户，之后如何使用，参考官方手册。
+&emsp;&emsp;使用过程中，AI辅助创建和维护代码，对于尚未覆盖或对结构不满意的地方，需要手动修改。因此需要了解创建代码的结构。
+
+# 主要概念
+
+## 相关性
+
+&emsp;&emsp;使用品研，建议一切使用正常的中文，并尽可能靠近您的业务需求。系统利用相关性给出生成器的素材集合。一个相关性技术的例子，是搜索引擎中的提示，例如百度、谷歌中，你输入一部分，系统给你的提示。这类提示一般基于[N-Gram](https://en.wikipedia.org/wiki/N-gram)，这里有[一个入门例子](https://towardsdatascience.com/implementing-auto-complete-with-postgres-and-python-e03d34824079)
+
+&emsp;&emsp;品研的实现，基于[spacy](https://spacy.io/)，获取词、词性及依赖。并以相似的原理，组合出依赖、主谓、谓宾。加入全文索引中。作为生成器供应素材。然后由模拟函数得到结果，代入目标函数获取最佳结果。
+
+&emsp;&emsp;一个例子，在设计信息表格时，添加方法时，AI会给出若干建议(或直接默认选择)，选择即可。例如在商品表上，会得到添加购买、评论的建议。添加后，自动处理并生成后续代码。AI的缺点依然存在，如对结果不满意，只能手动修改。
+
+## 面向服务(SOA)
+
+&emsp;&emsp;为简化AI工作，品研的自身的代码结构，以及创建的代码，都是基于SOA的。并且整合了部署与维护。为fastify扩展了soa对象。未来会支持跨语言，因此服务的接口定义采用了[google protobuf](https://developers.google.com/protocol-buffers)。而不是typescript中的interface。
+
+&emsp;&emsp;一个服务，对调用者而言，就是一个实例，以实现某些接口。但是其隐含了如下需求:
+- loader: 为了创建类实例，需要加载类代码，这是由服务的装载器(loader)完成。为了复用装载器，装载器会被设计为可配置，其配置信息被保存在服务定义的`conf`项下。装载器自身也是一个服务。
+- deploy: 某些实例运行依赖外部服务(例如数据库服务器)，这些服务需要被部署并正常执行。部署器的职责就是检查依赖服务是否被部署完毕。可以设置`deploy:false`(默认)来跳过部署环节。部署器自身也是一个服务，参考[运行环境](#运行环境)。常见的部署器：
+  - docker: 基于本地docker环境的部署，主要用于轻量级环境，例如单机环境。本地环境就是一个轻量级环境。
+  - kubernetes: 基于kubernetes的部署。
+  - nomad: 基于nomad的部署器。
+- preload: 预加载服务。某些服务启动时，需要依赖其它服务。由于服务默认是LOD(Load on Demand)，如果涉及部署，可能会需要很长时间，从而导致timeout异常。列在这里的服务，会在服务被加载时开始预加载。
+
+&emsp;&emsp;服务定义文件，可以定义多个服务。key为服务名称，值定义如下:
+- name:string&emsp;服务名称,可选。
+- conf:object&emsp; 实例时的配置.
+- loader:object&emsp; 装载器配置。
+- deploy?:&emsp; 部署器配置。
+- preload?:string[]&emsp;预加载列表。是一个数组，值为srv-name。
+
+## 运行环境
+
+&emsp;&emsp;通过web界面，在本地环境时，提供了维护运行环境的能力。运行环境通过在config目录下建立符号链接active来支持。有效的运行环境在config/runtime.json中定义。这一设定是考虑由web ui来维护运行环境。在config/{mode}/opts.json中添加对应的[fastify启动配置]([https://www.fastify.io/docs/latest/Reference/Server/)
+
+**😄 注意，默认配置，config目录不会保存到git中。这里有可能保存了key,cert等敏感文件。**
+
+### 环境管理
+
+&emsp;&emsp;每个运行环境为一个集群，即使本地环境也是一个集群，可以弹性扩充。本地的集群管理使用[consul](https://github.com/hashicorp/consul)。web端使用使用[node-consul](https://github.com/silas/node-consul)来通信。为方便部署，服务部署采用节点的管理与维护采用同一公司的[nomad](https://www.nomadproject.io/)。在服务未启动，但是定义的节点有效时，自动启动。其它集群的管理系统可选采用[Kubernetes系列](https://kubernetes.io/)。这里有如下一个些概念需要区分:
+- 节点: 可以是物理机、容器...
+- 服务(组): 不仅仅包括可部署服务，也包括外部服务。服务在客户端是一个包。
+  - 接口： 使用者可以恒定调用接口。接口采用[gRpc](https://grpc.io/)格式。
+  - 实现： 如果服务提供与接口不同，会提供实现包将其转化为接口。
+- 任务： 这里特指nomad的维护任务。
+- 配置: 配置信息被保存在consul中。
+- secret: secret信息被保存在vault服务中。
+
+**😄 注意，为了在windows下开发，本地环境未采用容器调度与管理服务。**
+
 
 # 目录结构
 
@@ -34,6 +99,9 @@
     - default.json 默认项目配置。
     - :sweat_drops: *production.json* 可选: 产品环境下的覆盖项。
     - :sweat_drops: *development* 可选: 开发环境下的覆盖项。
+    - redis: redis的本地目录。
+      - volumes: 存放redis stack server的数据。
+        - data: 映射到redis的/data，以存放数据。
     - elastic: elastic的本地目录
       - http_ca.crt: tls所需的证书。本地启动时自动从docer中获取。
       - passwd: elastic用户的密码，本地启动自动调用reset来获取最新。
@@ -63,26 +131,6 @@
 - frontend 由pv-fastify定义，结构与sveltekit相同，创建的客户端代码放入此目录下。
   - build pv-fastify会以这里为根目录启动fastify-static插件。这里也是sveltekit build的结果存放地。
 
-# 主要概念
-
-## 相关性
-
-&emsp;&emsp;使用品研，建议一切使用正常的中文，并尽可能靠近您的业务需求。系统利用相关性给出生成器的素材集合。一个相关性技术的例子，是搜索引擎中的提示，例如百度、谷歌中，你输入一部分，系统给你的提示。这类提示一般基于[N-Gram](https://en.wikipedia.org/wiki/N-gram)，这里有[一个入门例子](https://towardsdatascience.com/implementing-auto-complete-with-postgres-and-python-e03d34824079)
-
-&emsp;&emsp;品研的实现，基于[spacy](https://spacy.io/)，获取词、词性及依赖。并以相似的原理，组合出依赖、主谓、谓宾。加入全文索引中。作为生成器供应素材。然后由模拟函数得到结果，代入目标函数获取最佳结果。
-
-&emsp;&emsp;一个例子，在设计信息表格时，添加方法时，AI会给出若干建议，选择即可。例如在商品表上，会得到添加购买、评论的建议。添加后，自动处理并生成后续代码。AI的缺点依然存在，如对结果不满意，只能手动修改。
-
-## 运行环境
-
-&emsp;&emsp;通过web界面，在本地环境时，提供了维护运行环境的能力。运行环境通过在config目录下建立符号链接active来支持。有效的运行环境在config/runtime.json中定义。这一设定是考虑由web ui来维护运行环境。在config/{mode}/opts.json中添加对应的[fastify启动配置]([https://www.fastify.io/docs/latest/Reference/Server/)
-
-**😄 注意，默认配置，config目录不会保存到git中。这里有可能保存了key,cert等敏感文件。**
-
-### 集群管理
-
-&emsp;&emsp;集群管理使用[consul](https://github.com/hashicorp/consul),并在node环境下使用[node-consul](https://github.com/silas/node-consul)。集群管理只在集群环境下创建，运行环境切换到多机/多中心时，自动引入。
-
 # 在pv-fasitfy引入的插件及特性
 
 &emsp;&emsp;引入的插件及特性共用一个enabled/disabled配置。
@@ -100,6 +148,7 @@
 - [vault](https://github.com/nodevault/node-vault): 在nodejs环境中与[hashi vault](https://www.hashicorp.com/)交互的库。使用UI配置时，非本地环境默认开启。
 - [elastic](https://www.elastic.co/): 在nodejs环境中与elasticsearch通信的支持，本地环境下强制开启。
 - [zinc](https://zincsearch.com/): 使用zinsearch执行全文检索。
+- [redis](https://redis.io/): redis兼容的内存数据库，本地环境下强制开启。
 
 ## 默认启用
 
@@ -154,6 +203,9 @@
   - util.contain(string,string) : 给定属性路径下，如果是一个数组，是否包含指定的值。
   - util.isDisabled(string) : [boolean]指定的插件或特性是否被配置禁用了，不配置默认是启用的。
   - util.isEnabled(string) : [boolean]指定的插件或特性是否被配置允许了，不配置默认是禁用的。
+- soa : [Service-oriented architecture](https://en.wikipedia.org/wiki/Service-oriented_architecture)的前端对象。通过接口获取服务对象。
+  - async get(serviceName,opt) 获取服务对象(DNS liked name)。可能会涉及服务装载等动作。服务装载，根据配置，委托给kubernetes或nomad或自行实现的一个简化版(基于dockerode).
+  - async reg(serviceName,any) 类似decorate，为soa注册可用服务。
 - sco : (service configuration objects)根据配置引入的对象，通常使用前需要检查是否有效。
   - Dockerode : docerode引入的类，如果docker被允许(本地环境或启用了Docker插件)
   - docker : 按照默认配置加载的docker实例。
@@ -166,3 +218,13 @@
   - elastic: 如果elastic被支持，则指向了[nodejs sdk intance](https://github.com/elastic/elasticsearch-js)
   - Elastic: 如果elastic被支持，则指向了Elastic Client类。
 
+# 服务列表
+- docker
+- Dockerode
+- DockerodeCompose
+- DockerodeModem
+- modem
+- vault
+- static
+- elastic
+- Elastic
