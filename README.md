@@ -8,20 +8,19 @@
 - [主要概念](#主要概念)
   - [相关性](#相关性)
   - [面向服务(SOA)](#面向服务soa)
+    - [简介](#简介)
+    - [Why SOA?](#why-soa)
+    - [服务定义(SDL)](#服务定义sdl)
   - [运行环境](#运行环境)
-    - [环境管理](#环境管理)
+    - [部署服务](#部署服务)
 - [目录结构](#目录结构)
   - [根目录](#根目录)
-- [在pv-fasitfy引入的插件及特性](#在pv-fasitfy引入的插件及特性)
-  - [默认关闭](#默认关闭)
-    - [插件](#插件)
-    - [特性](#特性)
+- [fastify扩展说明(decorate)](#fastify扩展说明decorate)
+- [服务与配置](#服务与配置)
+  - [配置说明](#配置说明)
+  - [服务列表](#服务列表)
   - [默认启用](#默认启用)
-    - [插件](#插件-1)
-    - [特性](#特性-1)
-- [配置说明](#配置说明)
-- [decorate说明](#decorate说明)
-- [服务列表](#服务列表)
+  - [默认关闭](#默认关闭)
 
 # 使用说明
 &emsp;&emsp;如果不修改AI创建的代码，不需要开发知识。但是不修改是不可能的。因此，品研从V2开始，假定使用者为程序员。抛弃了V1为领域专家准备的修改UI——如果想支持全部修改，工作量过于浩大了。
@@ -49,6 +48,7 @@
 
 ## 面向服务(SOA)
 
+### 简介
 &emsp;&emsp;为简化AI工作，品研的自身的代码结构，以及创建的代码，都是基于SOA的。并且整合了部署与维护。为fastify扩展了soa对象。未来会支持跨语言，因此服务的接口定义采用了[google protobuf](https://developers.google.com/protocol-buffers)。而不是typescript中的interface。
 
 &emsp;&emsp;一个服务，对调用者而言，就是一个实例，以实现某些接口。但是其隐含了如下需求:
@@ -59,10 +59,17 @@
   - nomad: 基于nomad的部署器。
 - preload: 预加载服务。某些服务启动时，需要依赖其它服务。由于服务默认是LOD(Load on Demand)，如果涉及部署，可能会需要很长时间，从而导致timeout异常。列在这里的服务，会在服务被加载时开始预加载。
 
-&emsp;&emsp;服务定义文件，可以定义多个服务。key为服务名称，值定义如下:
+### Why SOA?
+&emsp;&emsp;为什么采用SOA,这是为了简化后续AI对体系结构性的设计。注意SOA风格下，体系结构的设计，不体现在代码上，而是体现在服务定义文件的不同上。对于AI而言，工作职责就是从自然语言等输入，构建服务定义的相关性，得到生成器集合，然后通过模拟函数模拟并计算目标，以完成体系结构设计。很明显，相对于分析AST中的关系，SOA带来的这种映射简化了AI的实现。对人而言，SOA做为实现风格之一，也被很多人所熟悉，算是人与机器之间，关于工作量的一个妥协。
+&emsp;&emsp;定义体系结构，就是定义服务组合。设计一个应用，首先定义其服务组合。可以将config目录下的服务定义看作体系结构定义。注意这里的服务与[micro-service](https://en.wikipedia.org/wiki/Microservices)有区别。自行查阅代码了解。
+
+### 服务定义(SDL)
+&emsp;&emsp;一个服务定义文件，可以定义多个服务。key为服务名称，值定义如下:
 - name:string&emsp;服务名称,可选。
+- disable: boolean&emsp; 是否此服务被禁用，默认false.
 - conf:object&emsp; 实例时的配置.
-- loader:object&emsp; 装载器配置。
+- loader:object|string&emsp; 装载器配置。类似url,protocal部分为type,例如:yarn://packagename#local-parameters。默认的http/https假定装载的是一个es6 module.
+  - type: 装载器类型:es6|npm|yarn
 - deploy?:&emsp; 部署器配置。
 - preload?:string[]&emsp;预加载列表。是一个数组，值为srv-name。
 
@@ -72,7 +79,7 @@
 
 **😄 注意，默认配置，config目录不会保存到git中。这里有可能保存了key,cert等敏感文件。**
 
-### 环境管理
+### 部署服务
 
 &emsp;&emsp;每个运行环境为一个集群，即使本地环境也是一个集群，可以弹性扩充。本地的集群管理使用[consul](https://github.com/hashicorp/consul)。web端使用使用[node-consul](https://github.com/silas/node-consul)来通信。为方便部署，服务部署采用节点的管理与维护采用同一公司的[nomad](https://www.nomadproject.io/)。在服务未启动，但是定义的节点有效时，自动启动。其它集群的管理系统可选采用[Kubernetes系列](https://kubernetes.io/)。这里有如下一个些概念需要区分:
 - 节点: 可以是物理机、容器...
@@ -92,11 +99,11 @@
 
 ## 根目录
 
-- config 由pv-fastify定义的目录，不会加入到git中，存放运行环境定义。每个目录为一个运行环境。应用配置由[node-config](https://github.com/node-config/node-config)来处理，请参考其文档了解支持的格式及使用方式。
-  - :sweat_drops: nodes.json 一个数组，定义了全部运行环境，方便admin快速处理，无需从目录中重构。local为本地。
+- config 由pv-fastify定义的目录，不会加入到git中，存放服务定义。每个子目录为一个运行环境。应用配置由[node-config](https://github.com/node-config/node-config)来处理，请参考其文档了解支持的格式及使用方式。
+  - :sweat_drops: envs.json 一个数组，定义了全部运行环境，方便admin快速处理，无需从目录中重构。local为本地。
   - active 符号链接，链接到当前有效的运行环境。
   - local 本地运行环境：应用，数据库等配置信息。
-    - default.json 默认项目配置。
+    - default.json 默认项目服务定义文件。
     - :sweat_drops: *production.json* 可选: 产品环境下的覆盖项。
     - :sweat_drops: *development* 可选: 开发环境下的覆盖项。
     - redis: redis的本地目录。
@@ -131,68 +138,7 @@
 - frontend 由pv-fastify定义，结构与sveltekit相同，创建的客户端代码放入此目录下。
   - build pv-fastify会以这里为根目录启动fastify-static插件。这里也是sveltekit build的结果存放地。
 
-# 在pv-fasitfy引入的插件及特性
-
-&emsp;&emsp;引入的插件及特性共用一个enabled/disabled配置。
-
-## 默认关闭
-
-### 插件
-- [static](https://github.com/fastify/fastify-static) : 静态资源在开发环境下存放在pubroot目录下。其它环境由环境自行定义。代码中引入必须在compress插件之前。注意引入的插件也会暴露静态资源。列表如下：
-- [rate-limit](https://github.com/fastify/fastify-rate-limit): 对全局或指定请求限速。
-
-### 特性
-- [docker](https://github.com/apocas/dockerode): 为isLocal引入Dockerode类及docker对象,本地环境下强制开启。
-- [docker-compose](https://github.com/apocas/dockerode-compose): 为isLocal引入DockerodeCompose类及compose对象。
-- [docker-modem](https://github.com/apocas/docker-modem): 为isLocal引入DockerodeModem类及modem对象。
-- [vault](https://github.com/nodevault/node-vault): 在nodejs环境中与[hashi vault](https://www.hashicorp.com/)交互的库。使用UI配置时，非本地环境默认开启。
-- [elastic](https://www.elastic.co/): 在nodejs环境中与elasticsearch通信的支持，本地环境下强制开启。
-- [zinc](https://zincsearch.com/): 使用zinsearch执行全文检索。
-- [redis](https://redis.io/): redis兼容的内存数据库，本地环境下强制开启。
-
-## 默认启用
-
-### 插件
-- [cors](https://github.com/fastify/fastify-cors) : 引入cors支持。默认origin为false.
-- [circuit-breaker](https://github.com/fastify/fastify-circuit-breaker) : 引入断路器支持。如果需要，请在route级设置onCircuitOpen，onTimeout。
-- [accepts](https://github.com/fastify/fastify-accepts) : 支持与客户端的格式协商。
-- [compress](https://github.com/fastify/fastify-compress) : 支持回应压缩格式。
-
-### 特性
-- [crypto-random](https://github.com/sindresorhus/crypto-random-string) : 支持sco.cryptoRandom
-
-# 配置说明
-
-&emsp;&emsp;当前激活的配置文件存放在目录config/active/default.XXX中。在运行期代码并未维护配置之间的相关性，如果某个依赖服务未就绪，直接报错。在admin的UI代码中维护配置的相关性。可配置内容如下:
-
-- fastify: 保存[fastify启动配置](https://www.fastify.io/docs/latest/Reference/Server/#factory)。
-  
-  - logger: logger的可配置项，参考[pino配置对象](https://github.com/pinojs/pino/blob/master/docs/api.md#options-object)。pv-fastify允许logger值为字符串，此时其指向了logger对象定义模块,空为'./logger.js',pino的log系列方法的message格式，采用%s,%d,%o占位方式，[参考其文档](https://github.com/pinojs/pino/blob/master/docs/api.md#message)。
-
-    ```json
-    "fastify" : {
-    }
-    ```
-
-- env: 定义了运行环境。
-  
-  - name: [string] 运行环境人读名称。
-  - mname: [string] 运行环境机读名称——此名称也是保存配置的目录名称。
-  - local: [boolean] 是否是本地环境，以决定是否加载本地开发模块，请不要在正式环境下设置此值。
-  - disabled-plugins: [Array<String>] 禁用的内建插件。
-  - enabled-plugins: [Array<String>] 启用的内建插件。
-- cors: 定义了cors设置。参考[cors-options](https://github.com/fastify/fastify-cors#options)
-- circuit-breaker: 定义了断路器，通常由AI维护。参考[circuit-breaker options](https://github.com/fastify/fastify-circuit-breaker#options)
-- rate-limit: 参考[限速配置](https://github.com/fastify/fastify-rate-limit#options)了解这里允许的内容。
-- compress: 参考[压缩配置](https://github.com/fastify/fastify-compress#compress-options)。
-- static: 参考[静态资源](https://github.com/fastify/fastify-static#options)配置项。
-- docker: 参考[使用dockerode](https://github.com/apocas/dockerode#usage)了解允许的配置项。
-- docker-modem: 参考[使用docker-modem](https://github.com/apocas/docker-modem#getting-started)
-- vault : [node-vault配置项](https://github.com/nodevault/node-vault#init-and-unseal)。
-- elastic: [elastic配置](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-configuration.html)。如果使用docker,通常桌面版的max_map_count不足，临时修改的指令:`sudo sysctl -w vm.max_map_count=262144`。长期生效，修改文件`/etc/sysctl.conf`，在其中添加`vm.max_map_count=262144`
-- db: 保存了database配置.
-
-# decorate说明
+# fastify扩展说明(decorate)
 
 - _ : [lodash对象](https://lodash.com/) : 被内建添加，不能移除。内部代码依赖lodash.
 - $ : [promise-utils对象](https://github.com/blend/promise-utils) : 被内建支持，不能移除。内部代码依赖此库。
@@ -204,8 +150,16 @@
   - util.isDisabled(string) : [boolean]指定的插件或特性是否被配置禁用了，不配置默认是启用的。
   - util.isEnabled(string) : [boolean]指定的插件或特性是否被配置允许了，不配置默认是禁用的。
 - soa : [Service-oriented architecture](https://en.wikipedia.org/wiki/Service-oriented_architecture)的前端对象。通过接口获取服务对象。
-  - async get(serviceName,opt) 获取服务对象(DNS liked name)。可能会涉及服务装载等动作。服务装载，根据配置，委托给kubernetes或nomad或自行实现的一个简化版(基于dockerode).
-  - async reg(serviceName,any) 类似decorate，为soa注册可用服务。
+  - S
+    - UNLOAD: 尚未装载
+    - LOADING: 加载状态
+    - READY: 准备就绪
+    - ERROR: 运行错误
+  - state(serviceName) 同步获取服务当前状态。
+  - async get(serviceName) 获取服务对象(DNS liked name)。可能会涉及服务装载等动作。服务装载，根据配置，委托给kubernetes或nomad或自行实现的一个简化版(基于dockerode).
+  - async reg(serviceName,SDL) 类似decorate，为soa注册可用服务。
+
+
 - sco : (service configuration objects)根据配置引入的对象，通常使用前需要检查是否有效。
   - Dockerode : docerode引入的类，如果docker被允许(本地环境或启用了Docker插件)
   - docker : 按照默认配置加载的docker实例。
@@ -218,13 +172,51 @@
   - elastic: 如果elastic被支持，则指向了[nodejs sdk intance](https://github.com/elastic/elasticsearch-js)
   - Elastic: 如果elastic被支持，则指向了Elastic Client类。
 
-# 服务列表
-- docker
-- Dockerode
-- DockerodeCompose
-- DockerodeModem
-- modem
-- vault
-- static
-- elastic
-- Elastic
+
+# 服务与配置
+
+## 配置说明
+&emsp;&emsp;当前激活的配置文件存放在目录config/active/default.XXX中。运行期代码并未维护配置之间的相关性，如果某个依赖服务未配置，直接报错。在admin的UI代码中维护配置的相关性。
+
+&emsp;&emsp;如果想禁用一个内部预置开启的服务(含fastify plugins)。按照SDL,在配置中添加服务名，并设置disable:true。按照默认开启一个服务，只需在配置文件中添加服务入口即可，例如:`cors:{}`
+
+## 服务列表
+
+## 默认启用
+
+- fastify: 返回fastify对象。
+  - conf: 保存[fastify启动配置](https://www.fastify.io/docs/latest/Reference/Server/#factory)。
+    - logger: logger的可配置项，参考[pino配置对象](https://github.com/pinojs/pino/blob/master/docs/api.md#options-object)。pv-fastify允许logger值为字符串，此时其指向了logger对象定义模块,空为'./logger.js',pino的log系列方法的message格式，采用%s,%d,%o占位方式，[参考其文档](https://github.com/pinojs/pino/blob/master/docs/api.md#message)。
+- env: 定义了运行环境。返回env对象。
+  - conf
+    - name: [string] 运行环境人读名称。
+    - mname: [string] 运行环境机读名称——此名称也是保存配置的目录名称。
+    - local: [boolean] 是否是本地环境，以决定是否加载本地开发模块，请不要在正式环境下设置此值。
+    - disabled-plugins: [Array<String>] 禁用的fastify插件。
+    - enabled-plugins: [Array<String>] 启用的fastify插件。
+- cors: 定义了cors设置。返回插件对象。
+  - conf: 参考[cors-options](https://github.com/fastify/fastify-cors#options)
+- circuit-breaker: 返回插件对象。
+  - conf: 定义了断路器，通常由AI维护。参考[circuit-breaker options](https://github.com/fastify/fastify-circuit-breaker#options)
+- compress:
+  - conf: 参考[压缩配置](https://github.com/fastify/fastify-compress#compress-options)。
+- accepts: [accepts](https://github.com/fastify/fastify-accepts) : 支持与客户端的格式协商。
+- cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/)。[crypto-random](https://github.com/sindresorhus/crypto-random-string)。
+
+## 默认关闭
+
+- rate-limit:
+  - conf: 参考[限速配置](https://github.com/fastify/fastify-rate-limit#options)了解这里允许的内容。对全局或指定请求限速。
+- static:
+  - conf: 参考[静态资源](https://github.com/fastify/fastify-static#options)配置项。在本地环境下默认开启。
+- docker:
+  - conf: 参考[使用dockerode](https://github.com/apocas/dockerode#usage)了解允许的配置项。
+- docker-modem:
+  - conf: 参考[使用docker-modem](https://github.com/apocas/docker-modem#getting-started)
+- vault :
+  - conf: [node-vault配置项](https://github.com/nodevault/node-vault#init-and-unseal)。
+- elastic:
+  - conf: [elastic配置](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-configuration.html)。如果使用docker,通常桌面版的max_map_count不足，临时修改的指令:`sudo sysctl -w vm.max_map_count=262144`。长期生效，修改文件`/etc/sysctl.conf`，在其中添加`vm.max_map_count=262144`。本地环境下默认开启。
+- [zinc](https://zincsearch.com/): 使用zinsearch执行全文检索。
+- [redis](https://redis.io/): redis兼容的内存数据库，本地环境下强制开启。
+- npm

@@ -17,7 +17,15 @@ module.exports = async function (fastify, opts) {
 
   // 在prodvest包中覆盖此实现。
   const dummy = () => { return null }
-  const soa = { get: dummy, reg: dummy }
+  const S = {
+    UNREG: -2,
+    UNLOAD: -1,
+    READY: 0,
+    LOADING: 1,
+    ERROR: 2,
+    FAIL: 3
+  }
+  const soa = { get: dummy, reg: dummy, state: dummy, S }
   fastify.decorate('soa', soa)
 
   const sco = {}
@@ -29,10 +37,10 @@ module.exports = async function (fastify, opts) {
   // })
 
   _.set(config, 'util.isLocal', () => {
-    if (!config.has('env.local')) {
+    if (!config.has('env.conf.local')) {
       return false
     }
-    return !!config.get('env.local')
+    return !!config.get('env.conf.local')
   })
 
   function contain (propPath, chkValue) {
@@ -52,11 +60,16 @@ module.exports = async function (fastify, opts) {
     }
     return config.has(propPath) ? config.get(propPath) : defValue
   })
-  _.set(config, 'util.isDisabled', _.bind(contain, null, 'env.disabled-plugins'))
-  _.set(config, 'util.isEnabled', _.bind(contain, null, 'env.enabled-plugins'))
+  _.set(config, 'util.isDisabled', _.bind(contain, null, 'env.conf.disabled-plugins'))
+  _.set(config, 'util.isEnabled', _.bind(contain, null, 'env.conf.enabled-plugins'))
   const base = process.cwd()
   _.set(config, 'util.path', (...args) => {
     const newarg = [base, ...Array.from(args)]
+    return path.join.apply(null, newarg)
+  })
+  const cfgBase = path.join(base, 'config', 'active')
+  _.set(config, 'util.cfgpath', (...args) => {
+    const newarg = [cfgBase, ...Array.from(args)]
     return path.join.apply(null, newarg)
   })
 
@@ -85,4 +98,4 @@ module.exports = async function (fastify, opts) {
   })
 }
 
-module.exports.options = config.has('fastify') ? config.get('fastify') : {}
+module.exports.options = config.has('fastify.conf') ? config.get('fastify.conf') : {}
