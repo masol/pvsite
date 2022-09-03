@@ -159,20 +159,6 @@
   - async get(serviceName) 获取服务对象(DNS liked name)。可能会涉及服务装载等动作。服务装载，根据配置，委托给kubernetes或nomad或自行实现的一个简化版(基于dockerode).
   - async reg(serviceName,SDL) 类似decorate，为soa注册可用服务。
 
-
-- sco : (service configuration objects)根据配置引入的对象，通常使用前需要检查是否有效。
-  - Dockerode : docerode引入的类，如果docker被允许(本地环境或启用了Docker插件)
-  - docker : 按照默认配置加载的docker实例。
-  - DockerodeCompose: dockerode-compose引入的类。[后续用法](https://github.com/apocas/dockerode-compose#getting-started)
-  - DockerodeModem: dockerode-modem[引入的类](https://github.com/apocas/docker-modem#getting-started)。
-  - modem: 按照配置创建的modem实例。
-  - static : fastify-static插件对象，用于后续的静态路径配置。如果本地或static被启用。
-  - vault : [node-vault对象](https://github.com/nodevault/node-vault#usage)。如果vault被启用。
-  - cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/crypto-random-string)
-  - elastic: 如果elastic被支持，则指向了[nodejs sdk intance](https://github.com/elastic/elasticsearch-js)
-  - Elastic: 如果elastic被支持，则指向了Elastic Client类。
-
-
 # 服务与配置
 
 ## 配置说明
