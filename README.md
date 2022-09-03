@@ -69,7 +69,7 @@
 - disable: boolean&emsp; 是否此服务被禁用，默认false.
 - noprepare: boolean&emsp; 是否此服务无需预加载，默认false.
 - conf:object&emsp; 实例时的配置.
-- loader:object|string&emsp; 装载器配置。类似url,protocal部分为type,例如:yarn://packagename#local-parameters。默认的http/https假定装载的是一个es6 module.
+- loader:object|string&emsp; 装载器配置。类似url,protocal部分为type,例如:`yarn://packagename#local-parameters`。默认的http/https假定装载的是一个es6 module.
   - type: 装载器类型:es6|npm|yarn
 - deploy?:&emsp; 部署器配置。
 - preload?:string[]&emsp;预加载列表。是一个数组，值为srv-name。
