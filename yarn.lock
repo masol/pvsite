@@ -1728,6 +1728,11 @@ html-escaper@^2.0.0:
   resolved "https://registry.npmmirror.com/html-escaper/-/html-escaper-2.0.2.tgz#dfd60027da36a36dfcbe236262c00a5822681453"
   integrity sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==
 
+http-errors-enhanced@^1.0.9:
+  version "1.0.9"
+  resolved "https://registry.npmmirror.com/http-errors-enhanced/-/http-errors-enhanced-1.0.9.tgz#6d4613f4550d8a120036848de631b4a15379a0a8"
+  integrity sha512-aeVcodC8v+DXtyD1F84rDhOJd0ctTyIiPl+ZiIlwRtt6FoaQIKl8WfH2G6sGWd1YMj6bJLP7A5A2ncRI9O/0WA==
+
 http-errors@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmmirror.com/http-errors/-/http-errors-2.0.0.tgz#b7774a1486ef73cf7667ac9ae0858c012c57b9d3"

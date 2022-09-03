@@ -1,3 +1,4 @@
+
 'use strict'
 
 const path = require('path')
@@ -9,11 +10,13 @@ const config = require('config')
 
 module.exports = async function (fastify, opts) {
   // Place here your custom code!
+  const error = await import('http-errors-enhanced')
   const _ = require('lodash')
 
   fastify.decorate('_', _)
   fastify.decorate('$', promiseUtils)
   fastify.decorate('config', config)
+  fastify.decorate('error', error)
 
   // 在prodvest包中覆盖此实现。
   const dummy = () => { return null }
@@ -27,9 +30,6 @@ module.exports = async function (fastify, opts) {
   }
   const soa = { get: dummy, reg: dummy, state: dummy, S }
   fastify.decorate('soa', soa)
-
-  const sco = {}
-  fastify.decorate('sco', sco)
 
   // fastify.addHook('onClose',()=>{
   //   fastify.decorate('_', null)

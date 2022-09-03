@@ -67,6 +67,7 @@
 &emsp;&emsp;一个服务定义文件，可以定义多个服务。key为服务名称，值定义如下:
 - name:string&emsp;服务名称,可选。
 - disable: boolean&emsp; 是否此服务被禁用，默认false.
+- noprepare: boolean&emsp; 是否此服务无需预加载，默认false.
 - conf:object&emsp; 实例时的配置.
 - loader:object|string&emsp; 装载器配置。类似url,protocal部分为type,例如:yarn://packagename#local-parameters。默认的http/https假定装载的是一个es6 module.
   - type: 装载器类型:es6|npm|yarn
@@ -142,6 +143,7 @@
 
 - _ : [lodash对象](https://lodash.com/) : 被内建添加，不能移除。内部代码依赖lodash.
 - $ : [promise-utils对象](https://github.com/blend/promise-utils) : 被内建支持，不能移除。内部代码依赖此库。
+- error: [http oritend error](https://github.com/ShogunPanda/http-errors-enhanced)提供的异常函数，有按照[http status code](https://github.com/ShogunPanda/http-errors-enhanced/blob/main/src/errors.ts)的对应快捷异常类。
 - config: node-config加载的对象，除了加载的配置,额外扩展了如下函数([cofing的内建函数](https://github.com/node-config/node-config/wiki/Using-Config-Utilities)):
   - util.isLocal() : [boolean]是否处于本地模式,以允许编辑模式。
   - util.path(string...): [string]返回参数构建的基于运行目录的目录。传入空，返回运行目录。
@@ -156,8 +158,9 @@
     - READY: 准备就绪
     - ERROR: 运行错误
   - state(serviceName) 同步获取服务当前状态。
-  - async get(serviceName) 获取服务对象(DNS liked name)。可能会涉及服务装载等动作。服务装载，根据配置，委托给kubernetes或nomad或自行实现的一个简化版(基于dockerode).
-  - async reg(serviceName,SDL) 类似decorate，为soa注册可用服务。
+  - async get(serviceName) 获取服务对象(DNS liked name)。可能会涉及服务装载等动作。服务装载，根据配置，委托给kubernetes或nomad或自行实现的一个简化版(基于dockerode)。
+  - reg(serviceName,{inst,loader}) 类似decorate，为soa注册可用服务。
+  - load(serviceName,SDL) 解析SDL定义，创建及注册serviceName。
 
 # 服务与配置
 
@@ -178,8 +181,6 @@
     - name: [string] 运行环境人读名称。
     - mname: [string] 运行环境机读名称——此名称也是保存配置的目录名称。
     - local: [boolean] 是否是本地环境，以决定是否加载本地开发模块，请不要在正式环境下设置此值。
-    - disabled-plugins: [Array<String>] 禁用的fastify插件。
-    - enabled-plugins: [Array<String>] 启用的fastify插件。
 - cors: 定义了cors设置。返回插件对象。
   - conf: 参考[cors-options](https://github.com/fastify/fastify-cors#options)
 - circuit-breaker: 返回插件对象。
