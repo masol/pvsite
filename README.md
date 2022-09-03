@@ -19,8 +19,8 @@
 - [服务与配置](#服务与配置)
   - [配置说明](#配置说明)
   - [服务列表](#服务列表)
-  - [默认启用](#默认启用)
-  - [默认关闭](#默认关闭)
+    - [默认启用](#默认启用)
+    - [默认关闭](#默认关闭)
 
 # 使用说明
 &emsp;&emsp;如果不修改AI创建的代码，不需要开发知识。但是不修改是不可能的。因此，品研从V2开始，假定使用者为程序员。抛弃了V1为领域专家准备的修改UI——如果想支持全部修改，工作量过于浩大了。
@@ -168,7 +168,7 @@
 
 ## 服务列表
 
-## 默认启用
+### 默认启用
 
 - fastify: 返回fastify对象。
   - conf: 保存[fastify启动配置](https://www.fastify.io/docs/latest/Reference/Server/#factory)。
@@ -189,7 +189,7 @@
 - accepts: [accepts](https://github.com/fastify/fastify-accepts) : 支持与客户端的格式协商。
 - cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/)。[crypto-random](https://github.com/sindresorhus/crypto-random-string)。
 
-## 默认关闭
+### 默认关闭
 
 - rate-limit:
   - conf: 参考[限速配置](https://github.com/fastify/fastify-rate-limit#options)了解这里允许的内容。对全局或指定请求限速。
