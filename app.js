@@ -11,12 +11,45 @@ const config = require('config')
 module.exports = async function (fastify, opts) {
   // Place here your custom code!
   const error = await import('http-errors-enhanced')
+  const npm = require('npm-commands')()
+  npm.cwd(process.cwd())
+  const loadCache = {}
+  const installPkg = async (pkgName) => {
+    if (loadCache[pkgName]) { // 此机制不跨进程，需要跨进程，例如基于redis或nfs,需要redis自举解耦。
+      return await loadCache[pkgName]
+    }
+    loadCache[pkgName] = npm.install(pkgName).catch(e => {
+      fastify.log.error('install package "%s" error:%s', pkgName, e)
+    })
+    await loadCache[pkgName]
+    delete loadCache[pkgName]
+  }
+
+  npm.require = async (pkgName) => {
+    let pkg
+    try {
+      pkg = require(pkgName)
+    } catch (e) {
+      await installPkg(pkgName)
+      pkg = require(pkgName)
+    }
+    return pkg
+  }
+  npm.import = async (pkgName) => {
+    return await import(pkgName).catch(async e => {
+      // fastify.log.debug('import %s error:%s', pkgName, e)
+      await installPkg(pkgName)
+      return await import(pkgName).catch(e => null)
+    })
+  }
   const _ = require('lodash')
 
   fastify.decorate('_', _)
   fastify.decorate('$', promiseUtils)
   fastify.decorate('config', config)
   fastify.decorate('error', error)
+  fastify.decorate('pkg', npm)
+  // console.log('lmify=', lmify)
 
   // 在prodvest包中覆盖此实现。
   const dummy = () => { return null }

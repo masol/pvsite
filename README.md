@@ -13,6 +13,7 @@
     - [服务定义(SDL)](#服务定义sdl)
   - [运行环境](#运行环境)
     - [部署服务](#部署服务)
+    - [规避热部署](#规避热部署)
 - [目录结构](#目录结构)
   - [根目录](#根目录)
 - [fastify扩展说明(decorate)](#fastify扩展说明decorate)
@@ -93,6 +94,9 @@
 
 **😄 注意，为了在windows下开发，本地环境未采用容器调度与管理服务。**
 
+### 规避热部署
+&emsp;&emsp;热部署的开销比你想象的高——甚至包括包的自动安装。由于产品环境下，多个节点在执行。为了规避同时发出的部署请求，需要锁系统支持。因此，每次热部署只有一个调用者会执行，其它排队。采用UI会创建冷部署，而不是热部署。手动配置请尽可能不依赖热部署。
+
 
 # 目录结构
 
@@ -144,6 +148,9 @@
 - _ : [lodash对象](https://lodash.com/) : 被内建添加，不能移除。内部代码依赖lodash.
 - $ : [promise-utils对象](https://github.com/blend/promise-utils) : 被内建支持，不能移除。内部代码依赖此库。
 - error: [http oritend error](https://github.com/ShogunPanda/http-errors-enhanced)提供的异常函数，有按照[http status code](https://github.com/ShogunPanda/http-errors-enhanced/blob/main/src/errors.ts)的对应快捷异常类。
+- pkg: [npm子进程模式](https://github.com/flaviotulino/npm-commands)提供程序接口安装package。增加本地包的自维护性。假定只用于维护,从网络加载的es的依赖包。额外扩展了两个函数:
+  - require(pkgName,opt?) async require pkg,如果失败，则install后重试。
+  - import(pkgName,opt?) async import es6 pkg，如果失败，则install后重试。
 - config: node-config加载的对象，除了加载的配置,额外扩展了如下函数([cofing的内建函数](https://github.com/node-config/node-config/wiki/Using-Config-Utilities)):
   - util.isLocal() : [boolean]是否处于本地模式,以允许编辑模式。
   - util.path(string...): [string]返回参数构建的基于运行目录的目录。传入空，返回运行目录。
@@ -159,8 +166,8 @@
     - ERROR: 运行错误
   - state(serviceName) 同步获取服务当前状态。
   - async get(serviceName) 获取服务对象(DNS liked name)。可能会涉及服务装载等动作。服务装载，根据配置，委托给kubernetes或nomad或自行实现的一个简化版(基于dockerode)。
-  - reg(serviceName,{inst,loader}) 类似decorate，为soa注册可用服务。
-  - load(serviceName,SDL) 解析SDL定义，创建及注册serviceName。
+  - async reg(serviceName,{inst,loader}) 类似decorate，为soa注册可用服务。
+  - async load(serviceName,SDL) 解析SDL定义，创建及注册serviceName。
 
 # 服务与配置
 
@@ -180,7 +187,17 @@
   - conf
     - name: [string] 运行环境人读名称。
     - mname: [string] 运行环境机读名称——此名称也是保存配置的目录名称。
-    - local: [boolean] 是否是本地环境，以决定是否加载本地开发模块，请不要在正式环境下设置此值。
+    - local: [boolean] 是否是本地环境，以决定是否加载本地开发模块，有安全隐患，请不要在正式环境下设置此值。
+    - index: [string] 采用的全文索引库，设置为false以禁用全文检索。默认为elastic
+    - db: [string] 采用的database,设置为false以禁用database support。默认为postgres
+    - cache: [string] 采用的memory cache,设置为false以禁用内存缓冲。默认为redis。
+    - fs: [string] 采用的文件存储，设置为false以禁用文件存储。默认为local。
+    - secure: [string] 采用的安全存储，设置为false以禁用安全存储。默认为false，可选vault。
+    - static: [string] 静态资源存储，设置为false以禁用静态资源服务。默认为local。
+    - deploy: [string|object|boolean] 本地环境下，此配置被忽略，强制采用docker模式。指定部署方式,如果设置为false,则禁止自动部署。按照部署方式将其分为如下三类:
+      - native mode: 在指定机器上安装软件，不依赖docker部署。ansible、salt、puppet都属于此类。这种方式无论单机还是大规模集群都可以，包括docker in container mode.
+      - single machine docker mode: 单机或者少量机器，只采用docker来简化环境依赖。不采用容器管理服务。本地环境默认为此模式。值为docker。
+      - cluster docker mode: 集群模式，采用专门的容器管理服务来配置，可用值为kubernetes、nomad
 - cors: 定义了cors设置。返回插件对象。
   - conf: 参考[cors-options](https://github.com/fastify/fastify-cors#options)
 - circuit-breaker: 返回插件对象。
@@ -188,7 +205,7 @@
 - compress:
   - conf: 参考[压缩配置](https://github.com/fastify/fastify-compress#compress-options)。
 - accepts: [accepts](https://github.com/fastify/fastify-accepts) : 支持与客户端的格式协商。
-- cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/)。[crypto-random](https://github.com/sindresorhus/crypto-random-string)。
+- cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/crypto-random-string)。
 
 ### 默认关闭
 
