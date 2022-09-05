@@ -5,14 +5,13 @@ const path = require('path')
 const AutoLoad = require('@fastify/autoload')
 const promiseUtils = require('blend-promise-utils')
 const goodies = require('@supercharge/goodies')
-const npm = require('npm-commands')()
+const shelljs = require('shelljs')
 
 process.env.NODE_CONFIG_DIR = process.env.NODE_CONFIG_DIR || path.join(__dirname, 'config', 'active')
 const config = require('config')
 
 module.exports = async function (fastify, opts) {
   // Place here your custom code!
-  npm.cwd(process.cwd())
   const npmCache = {}
   const installPkg = async (pkgName) => {
     // 此机制不跨进程，需要跨进程，例如基于redis或nfs,需要redis自举解耦。
@@ -20,7 +19,27 @@ module.exports = async function (fastify, opts) {
       return await npmCache[pkgName]
     }
     try {
-      npmCache[pkgName] = npm.install(pkgName)
+      const pm = fastify.config.util.dget('env.pkg', 'yarn')
+      let cmdline = ''
+      switch (pm) {
+        case 'yarn':
+          cmdline = `yarn add ${pkgName}`
+          break
+        case 'npm':
+          cmdline = `npm install --save ${pkgName}`
+          break
+        case 'pnpm':
+          cmdline = `pnpm add -P ${pkgName}`
+          break
+      }
+      if (cmdline) {
+        // 卡住当前nodejs，当时不能解决多进程互锁问题。
+        console.warn('请不要在产品环境下热部署！开始安装包%s，执行命令%s', pkgName, cmdline)
+        npmCache[pkgName] = shelljs.exec(cmdline, {
+          async: false
+        })
+        // fastify.log.info(npmCache[pkgName])
+      }
     } catch (e) {
       fastify.log.error('install package "%s" error:%s', pkgName, e)
     }
@@ -29,7 +48,7 @@ module.exports = async function (fastify, opts) {
     return pkg
   }
 
-  npm.require = async (pkgName) => {
+  shelljs.require = async (pkgName) => {
     let pkg
     try {
       pkg = require(pkgName)
@@ -39,7 +58,7 @@ module.exports = async function (fastify, opts) {
     }
     return pkg
   }
-  npm.import = async (pkgName) => {
+  shelljs.import = async (pkgName) => {
     return await import(pkgName).catch(async e => {
       // fastify.log.debug('import %s error:%s', pkgName, e)
       await installPkg(pkgName)
@@ -53,7 +72,7 @@ module.exports = async function (fastify, opts) {
   fastify.decorate('$', $)
   fastify.decorate('error', error)
   fastify.decorate('config', config)
-  fastify.decorate('pkg', npm)
+  fastify.decorate('shell', shelljs)
   // console.log('lmify=', lmify)
 
   // console.log('fastify.$=', fastify.$)

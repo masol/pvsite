@@ -146,7 +146,7 @@
 - _ : [lodash对象](https://lodash.com/) : 被内建添加，不能移除。内部代码依赖lodash.
 - $ : [promise-utils对象](https://github.com/blend/promise-utils)及[@supercharge/goodies](https://superchargejs.com/docs/3.x/goodies#using-goodie-methods) : 被内建支持，不能移除。内部代码依赖此库。
 - error: [http oritend error](https://github.com/ShogunPanda/http-errors-enhanced)提供的异常函数，有按照[http status code](https://github.com/ShogunPanda/http-errors-enhanced/blob/main/src/errors.ts)的对应快捷异常类。
-- pkg: [npm子进程模式](https://github.com/flaviotulino/npm-commands)提供程序接口安装package。增加本地包的自维护性。假定只用于维护,从网络加载的es的依赖包。额外扩展了两个函数:
+- shell: [以js虚拟shell实现](https://github.com/shelljs/shelljs)提供程序接口的shell界面，以使用当前用户维护系统。例如增加本地包的自维护性，因此额外扩展了两个函数(采用的包管理器通过env服务配置):
   - require(pkgName,opt?) async require pkg,如果失败，则install后重试。
   - import(pkgName,opt?) async import es6 pkg，如果失败，则install后重试。
 - config: node-config加载的对象，除了加载的配置,额外扩展了如下函数([cofing的内建函数](https://github.com/node-config/node-config/wiki/Using-Config-Utilities)):
@@ -182,6 +182,7 @@
     - name: [string] 运行环境人读名称。
     - mname: [string] 运行环境机读名称——此名称也是保存配置的目录名称。
     - local: [boolean] 是否是本地环境，以决定是否加载本地开发模块，有安全隐患，请不要在正式环境下设置此值。
+    - pkg: [string] 采用的包管理器。默认为yarn,可以设置为npm。
     - index: [string] 采用的全文索引库，设置为false以禁用全文检索。默认为elastic
     - db: [string] 采用的database,设置为false以禁用database support。默认为postgres
     - cache: [string] 采用的memory cache,设置为false以禁用内存缓冲。默认为redis。
