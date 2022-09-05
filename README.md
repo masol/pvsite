@@ -144,7 +144,7 @@
 # fastify扩展说明(decorate)
 
 - _ : [lodash对象](https://lodash.com/) : 被内建添加，不能移除。内部代码依赖lodash.
-- $ : [promise-utils对象](https://github.com/blend/promise-utils)及[@supercharge/goodies](https://superchargejs.com/docs/3.x/goodies#using-goodie-methods) : 被内建支持，不能移除。内部代码依赖此库。
+- $ : [promise-utils对象](https://github.com/blend/promise-utils)及[@supercharge/goodies](https://superchargejs.com/docs/3.x/goodies#using-goodie-methods) : 被内建支持，不能移除。内部代码依赖此库。一些优秀的promise工具库，例如[pify系列](https://github.com/sindresorhus/pify)未加入，如果需要，以普通库方式自行加载。
 - error: [http oritend error](https://github.com/ShogunPanda/http-errors-enhanced)提供的异常函数，有按照[http status code](https://github.com/ShogunPanda/http-errors-enhanced/blob/main/src/errors.ts)的对应快捷异常类。
 - shell: [以js虚拟shell实现](https://github.com/shelljs/shelljs)提供程序接口的shell界面，以使用当前用户维护系统。例如增加本地包的自维护性，因此额外扩展了两个函数(采用的包管理器通过env服务配置):
   - require(pkgName,opt?) async require pkg,如果失败，则install后重试。
