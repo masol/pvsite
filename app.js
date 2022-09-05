@@ -4,25 +4,29 @@
 const path = require('path')
 const AutoLoad = require('@fastify/autoload')
 const promiseUtils = require('blend-promise-utils')
+const goodies = require('@supercharge/goodies')
+const npm = require('npm-commands')()
 
 process.env.NODE_CONFIG_DIR = process.env.NODE_CONFIG_DIR || path.join(__dirname, 'config', 'active')
 const config = require('config')
 
 module.exports = async function (fastify, opts) {
   // Place here your custom code!
-  const error = await import('http-errors-enhanced')
-  const npm = require('npm-commands')()
   npm.cwd(process.cwd())
-  const loadCache = {}
+  const npmCache = {}
   const installPkg = async (pkgName) => {
-    if (loadCache[pkgName]) { // 此机制不跨进程，需要跨进程，例如基于redis或nfs,需要redis自举解耦。
-      return await loadCache[pkgName]
+    // 此机制不跨进程，需要跨进程，例如基于redis或nfs,需要redis自举解耦。
+    if (npmCache[pkgName]) {
+      return await npmCache[pkgName]
     }
-    loadCache[pkgName] = npm.install(pkgName).catch(e => {
+    try {
+      npmCache[pkgName] = npm.install(pkgName)
+    } catch (e) {
       fastify.log.error('install package "%s" error:%s', pkgName, e)
-    })
-    await loadCache[pkgName]
-    delete loadCache[pkgName]
+    }
+    const pkg = await npmCache[pkgName]
+    delete npmCache[pkgName]
+    return pkg
   }
 
   npm.require = async (pkgName) => {
@@ -43,26 +47,20 @@ module.exports = async function (fastify, opts) {
     })
   }
   const _ = require('lodash')
-
+  const $ = _.extend({}, promiseUtils, goodies)
+  const error = await import('http-errors-enhanced')
   fastify.decorate('_', _)
-  fastify.decorate('$', promiseUtils)
-  fastify.decorate('config', config)
+  fastify.decorate('$', $)
   fastify.decorate('error', error)
+  fastify.decorate('config', config)
   fastify.decorate('pkg', npm)
   // console.log('lmify=', lmify)
 
-  // 在prodvest包中覆盖此实现。
-  const dummy = () => { return null }
-  const S = {
-    UNREG: -2,
-    UNLOAD: -1,
-    READY: 0,
-    LOADING: 1,
-    ERROR: 2,
-    FAIL: 3
-  }
-  const soa = { get: dummy, reg: dummy, state: dummy, S }
-  fastify.decorate('soa', soa)
+  // console.log('fastify.$=', fastify.$)
+
+  // 在prodvest包中实现intEntry以获取内建支持的服务/包/插件。
+  const soa = require('pv-soa')
+  fastify.decorate('soa', soa.instance(fastify))
 
   // fastify.addHook('onClose',()=>{
   //   fastify.decorate('_', null)

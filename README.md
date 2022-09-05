@@ -61,19 +61,17 @@
 - preload: 预加载服务。某些服务启动时，需要依赖其它服务。由于服务默认是LOD(Load on Demand)，如果涉及部署，可能会需要很长时间，从而导致timeout异常。列在这里的服务，会在服务被加载时开始预加载。
 
 ### Why SOA?
-&emsp;&emsp;为什么采用SOA,这是为了简化后续AI对体系结构性的设计。注意SOA风格下，体系结构的设计，不体现在代码上，而是体现在服务定义文件的不同上。对于AI而言，工作职责就是从自然语言等输入，构建服务定义的相关性，得到生成器集合，然后通过模拟函数模拟并计算目标，以完成体系结构设计。很明显，相对于分析AST中的关系，SOA带来的这种映射简化了AI的实现。对人而言，SOA做为实现风格之一，也被很多人所熟悉，算是人与机器之间，关于工作量的一个妥协。
+&emsp;&emsp;采用SOA,是为了简化后续AI对体系结构性的设计。注意SOA风格下，体系结构的设计，不体现在代码上，而是体现在服务定义文件的不同上。对于AI而言，工作职责就是从自然语言等输入，构建服务定义的相关性，得到生成器集合，然后通过模拟函数模拟并计算目标，以完成体系结构设计。很明显，相对于分析AST中的关系，SOA带来的这种映射简化了AI的实现。对人而言，SOA做为实现风格之一，也被很多人所熟悉，算是人与机器之间，关于工作量的一个妥协。
 &emsp;&emsp;定义体系结构，就是定义服务组合。设计一个应用，首先定义其服务组合。可以将config目录下的服务定义看作体系结构定义。注意这里的服务与[micro-service](https://en.wikipedia.org/wiki/Microservices)有区别。自行查阅代码了解。
 
 ### 服务定义(SDL)
-&emsp;&emsp;一个服务定义文件，可以定义多个服务。key为服务名称，值定义如下:
+&emsp;&emsp;一个服务定义文件，可以定义多个服务。key为服务名称，值定义如下(这通常是由一个子AI设计并配置的，只有在不满意结果时，才需要人工修改):
 - name:string&emsp;服务名称,可选。
 - disable: boolean&emsp; 是否此服务被禁用，默认false.
-- noprepare: boolean&emsp; 是否此服务无需预加载，默认false.
 - conf:object&emsp; 实例时的配置.
 - loader:object|string&emsp; 装载器配置。类似url,protocal部分为type,例如:`yarn://packagename#local-parameters`。默认的http/https假定装载的是一个es6 module.
   - type: 装载器类型:es6|npm|yarn
 - deploy?:&emsp; 部署器配置。
-- preload?:string[]&emsp;预加载列表。是一个数组，值为srv-name。
 
 ## 运行环境
 
@@ -146,7 +144,7 @@
 # fastify扩展说明(decorate)
 
 - _ : [lodash对象](https://lodash.com/) : 被内建添加，不能移除。内部代码依赖lodash.
-- $ : [promise-utils对象](https://github.com/blend/promise-utils) : 被内建支持，不能移除。内部代码依赖此库。
+- $ : [promise-utils对象](https://github.com/blend/promise-utils)及[@supercharge/goodies](https://superchargejs.com/docs/3.x/goodies#using-goodie-methods) : 被内建支持，不能移除。内部代码依赖此库。
 - error: [http oritend error](https://github.com/ShogunPanda/http-errors-enhanced)提供的异常函数，有按照[http status code](https://github.com/ShogunPanda/http-errors-enhanced/blob/main/src/errors.ts)的对应快捷异常类。
 - pkg: [npm子进程模式](https://github.com/flaviotulino/npm-commands)提供程序接口安装package。增加本地包的自维护性。假定只用于维护,从网络加载的es的依赖包。额外扩展了两个函数:
   - require(pkgName,opt?) async require pkg,如果失败，则install后重试。
@@ -159,15 +157,11 @@
   - util.isDisabled(string) : [boolean]指定的插件或特性是否被配置禁用了，不配置默认是启用的。
   - util.isEnabled(string) : [boolean]指定的插件或特性是否被配置允许了，不配置默认是禁用的。
 - soa : [Service-oriented architecture](https://en.wikipedia.org/wiki/Service-oriented_architecture)的前端对象。通过接口获取服务对象。
-  - S
-    - UNLOAD: 尚未装载
-    - LOADING: 加载状态
-    - READY: 准备就绪
-    - ERROR: 运行错误
-  - state(serviceName) 同步获取服务当前状态。
   - async get(serviceName) 获取服务对象(DNS liked name)。可能会涉及服务装载等动作。服务装载，根据配置，委托给kubernetes或nomad或自行实现的一个简化版(基于dockerode)。
-  - async reg(serviceName,{inst,loader}) 类似decorate，为soa注册可用服务。
-  - async load(serviceName,SDL) 解析SDL定义，创建及注册serviceName。
+  - has(serviceName) 指定服务是否已被注册。
+  - async load(serviceName,SDL) 解析SDL定义，创建及注册serviceName。多次调用只有首次会执行真正的加载任务。
+  - async defSrv(serviceName,SDL) 获取内建支持的服务，为方便当前放在pv-fastify包中，未来本接口移除，放入pv-soa包中。
+  - async reg(serviceName,{inst,loader}) 内部函数，为soa注册可用服务。
 
 # 服务与配置
 
@@ -223,4 +217,3 @@
   - conf: [elastic配置](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-configuration.html)。如果使用docker,通常桌面版的max_map_count不足，临时修改的指令:`sudo sysctl -w vm.max_map_count=262144`。长期生效，修改文件`/etc/sysctl.conf`，在其中添加`vm.max_map_count=262144`。本地环境下默认开启。
 - [zinc](https://zincsearch.com/): 使用zinsearch执行全文检索。
 - [redis](https://redis.io/): redis兼容的内存数据库，本地环境下强制开启。
-- npm
