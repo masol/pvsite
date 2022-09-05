@@ -27,7 +27,8 @@
     "crypto-random-string": "^5.0.0",
     "fastify": "4.5.3",
     "fastify-cli": "^5.3.0",
-    "fastify-plugin": "^4.2.1"
+    "fastify-plugin": "^4.2.1",
+    "node-vault": "^0.9.22"
   },
   "devDependencies": {
     "eslint": "^8.0.1",
