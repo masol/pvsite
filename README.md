@@ -186,7 +186,7 @@
     - pkg: [string] 采用的包管理器。默认为yarn,可以设置为npm。
     - index: [string] 采用的全文索引库，设置为false以禁用全文检索。默认为elastic
     - db: [string] 采用的database,设置为false以禁用database support。默认为postgres
-    - cache: [string] 采用的memory cache,设置为false以禁用内存缓冲。默认为redis。
+    - share: [string] 采用的快速ipc共享(通常也被用做缓冲),设置为false以禁用ipc。默认为redis。
     - fs: [string] 采用的文件存储，设置为false以禁用文件存储。默认为local。
     - secure: [string] 采用的安全存储，设置为false以禁用安全存储。默认为false，可选vault。
     - static: [string] 静态资源存储，设置为false以禁用静态资源服务。默认为local。
@@ -202,6 +202,11 @@
   - conf: 参考[压缩配置](https://github.com/fastify/fastify-compress#compress-options)。
 - accepts: [accepts](https://github.com/fastify/fastify-accepts) : 支持与客户端的格式协商。
 - cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/crypto-random-string)。
+- cookie: [fastify-cookie](https://github.com/fastify/fastify-cookie),提供了cookie支持。启用是因为被session依赖。
+  - conf: [有效的配置](https://github.com/fastify/fastify-cookie#options)
+- session: [fastify-session](https://github.com/fastify/session)，如果未配置store，根据env中的share来决定。
+  - conf: [有效配置](https://github.com/fastify/session#options)。
+    - store: 默认store采用了[connect-redis](https://github.com/tj/connect-redis)。因此store中的配置项依赖connect-redis。
 
 ### 默认关闭
 
@@ -218,5 +223,6 @@
 - elastic:
   - conf: [elastic配置](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-configuration.html)。如果使用docker,通常桌面版的max_map_count不足，临时修改的指令:`sudo sysctl -w vm.max_map_count=262144`。长期生效，修改文件`/etc/sysctl.conf`，在其中添加`vm.max_map_count=262144`。本地环境下默认开启。
 - [zinc](https://zincsearch.com/): 使用zinsearch执行全文检索。
-- [redis](https://redis.io/): redis兼容的内存数据库，本地环境下强制开启。加载的模块为[node-redis](https://github.com/redis/node-redis)。
-  - conf: [node-redis配置](https://github.com/redis/node-redis/blob/master/docs/client-configuration.md).
+- [redis](https://redis.io/): redis兼容的内存数据库，本地环境下强制开启。
+  - package: 采用的库，默认是[`ioredis`](https://github.com/luin/ioredis),设置为`redis`，则加载[node-redis](https://github.com/redis/node-redis)，两者配置略有不同。
+  - conf: [node-redis配置](https://github.com/redis/node-redis/blob/master/docs/client-configuration.md)。[ioredis配置](https://github.com/luin/ioredis#connect-to-redis)。
