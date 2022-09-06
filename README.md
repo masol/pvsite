@@ -218,4 +218,5 @@
 - elastic:
   - conf: [elastic配置](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-configuration.html)。如果使用docker,通常桌面版的max_map_count不足，临时修改的指令:`sudo sysctl -w vm.max_map_count=262144`。长期生效，修改文件`/etc/sysctl.conf`，在其中添加`vm.max_map_count=262144`。本地环境下默认开启。
 - [zinc](https://zincsearch.com/): 使用zinsearch执行全文检索。
-- [redis](https://redis.io/): redis兼容的内存数据库，本地环境下强制开启。
+- [redis](https://redis.io/): redis兼容的内存数据库，本地环境下强制开启。加载的模块为[node-redis](https://github.com/redis/node-redis)。
+  - conf: [node-redis配置](https://github.com/redis/node-redis/blob/master/docs/client-configuration.md).
