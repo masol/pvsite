@@ -185,7 +185,7 @@
     - local: [boolean] 是否是本地环境，以决定是否加载本地开发模块，有安全隐患，请不要在正式环境下设置此值。
     - pkg: [string] 采用的包管理器。默认为yarn,可以设置为npm。
     - index: [string] 采用的全文索引库，设置为false以禁用全文检索。默认为elastic
-    - db: [string] 采用的database,设置为false以禁用database support。默认为postgres
+    - db: [string] 采用的database,设置为false以禁用database support。默认为knex(默认sqlite,远程需要外部配置)
     - share: [string] 采用的快速ipc共享(通常也被用做缓冲),设置为false以禁用ipc。默认为redis。
     - fs: [string] 采用的文件存储，设置为false以禁用文件存储。默认为local。
     - secure: [string] 采用的安全存储，设置为false以禁用安全存储。默认为false，可选vault。
@@ -202,6 +202,7 @@
   - conf: 参考[压缩配置](https://github.com/fastify/fastify-compress#compress-options)。
 - accepts: [accepts](https://github.com/fastify/fastify-accepts) : 支持与客户端的格式协商。
 - cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/crypto-random-string)。
+- knex-utils: 增加包[knext-utils](https://github.com/knex/knex-utils)用于检查连接(heartbeat)等动作。
 - cookie: [fastify-cookie](https://github.com/fastify/fastify-cookie),提供了cookie支持。启用是因为被session依赖。
   - conf: [有效的配置](https://github.com/fastify/fastify-cookie#options)
 - session: [fastify-session](https://github.com/fastify/session)，如果未配置store，根据env中的share来决定。
@@ -226,3 +227,5 @@
 - [redis](https://redis.io/): redis兼容的内存数据库，本地环境下强制开启。
   - package: 采用的库，默认是[`ioredis`](https://github.com/luin/ioredis),设置为`redis`，则加载[node-redis](https://github.com/redis/node-redis)，两者配置略有不同。
   - conf: [node-redis配置](https://github.com/redis/node-redis/blob/master/docs/client-configuration.md)。[ioredis配置](https://github.com/luin/ioredis#connect-to-redis)。
+- [knex](https://knexjs.org/): 默认采用knex访问数据库。如果未部署数据库，默认采用本地的sqlite3(数据存放在config/active/sqlite3/volumes/data.db)。其它数据库的配置、部署、迁移在图形界面下完成。(不同于knex migrations)
+  - conf: 参考[knex configuration](https://knexjs.org/guide/#configuration-options)

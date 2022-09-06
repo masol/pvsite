@@ -1,12 +1,30 @@
 
 'use strict'
-
+const fs = require('fs')
 const path = require('path')
 const AutoLoad = require('@fastify/autoload')
 const SOA = require('pv-soa')
 
 process.env.NODE_CONFIG_DIR = process.env.NODE_CONFIG_DIR || path.join(__dirname, 'config', 'active')
 const config = require('config')
+
+/// 从类url的配置中加载内容，如果没有，默认从文件中加载。
+// @todo: 将此函数加入到config.util中.
+function loadCtx (urlCtx, defPath) {
+  if (urlCtx) {
+    console.error('尚未实现类URL的key/cert配置(从vault,fs或直接获取值)。')
+  }
+  return fs.readFileSync(defPath)
+}
+const fastiConf = config.has('fastify.conf') ? Object.assign({}, config.get('fastify.conf')) : {}
+// const usehttps = false
+if (fastiConf.http2 || fastiConf.https) {
+  // usehttps = true
+  fastiConf.https = fastiConf.https || {}
+  const basePath = path.join(__dirname, 'config', 'active', 'fastify')
+  fastiConf.https.key = loadCtx(fastiConf.https.key, path.join(basePath, 'https.key'))
+  fastiConf.https.cert = loadCtx(fastiConf.https.cert, path.join(basePath, 'https.crt'))
+}
 
 module.exports = async function (fastify, opts) {
   // Place here your custom code!
@@ -33,6 +51,13 @@ module.exports = async function (fastify, opts) {
     }
   })
 
+  // if (usehttps) {
+  //   fastify.register(require('fastify-https-redirect'), {
+  //     httpPort: 1080,
+  //     httpsPort: 10443
+  //   })
+  // }
+
   // Do not touch the following lines
 
   // This loads all plugins defined in plugins
@@ -51,4 +76,5 @@ module.exports = async function (fastify, opts) {
   })
 }
 
-module.exports.options = config.has('fastify.conf') ? config.get('fastify.conf') : {}
+// console.log('fastiConf=', fastiConf)
+module.exports.options = fastiConf
