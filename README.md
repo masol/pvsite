@@ -105,10 +105,15 @@
 - config 由pv-fastify定义的目录，不会加入到git中，存放服务定义。每个子目录为一个运行环境。应用配置由[node-config](https://github.com/node-config/node-config)来处理，请参考其文档了解支持的格式及使用方式。
   - :sweat_drops: envs.json 一个数组，定义了全部运行环境，方便admin快速处理，无需从目录中重构。local为本地。
   - active 符号链接，链接到当前有效的运行环境。
-  - local 本地运行环境：应用，数据库等配置信息。
+  - local 本地运行环境：应用，数据库等配置信息。(下方目录都是默认值，如果更改配置文件，下方内容可能失效)
     - default.json 默认项目服务定义文件。
     - :sweat_drops: *production.json* 可选: 产品环境下的覆盖项。
     - :sweat_drops: *development* 可选: 开发环境下的覆盖项。
+    - postgres: postgres的本地目录。
+      - passwd: 内容保存了默认管理员(postgres)的密码，默认数据库为app。
+      - user.passwd: 内容保存了默认keycloak用户的密码，其默认数据库为keycloak。
+      - volumes: 存放数据到本地。
+        - data: 映射到`/var/lib/postgresql/data`，以保存数据。
     - redis: redis的本地目录。
       - volumes: 存放redis stack server的数据。
         - data: 映射到redis的/data，以存放数据。
