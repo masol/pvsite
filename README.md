@@ -144,12 +144,14 @@
 # fastify扩展说明(decorate)
 
 - _ : [lodash对象](https://lodash.com/) : 被内建添加，不能移除。内部代码依赖lodash.
+  - cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/crypto-random-string)。
 - $ : [promise-utils对象](https://github.com/blend/promise-utils)及[@supercharge/goodies](https://superchargejs.com/docs/3.x/goodies#using-goodie-methods) : 被内建支持，不能移除。内部代码依赖此库。一些优秀的promise工具库，例如[pify系列](https://github.com/sindresorhus/pify)未加入，如果需要，以普通库方式自行加载。
 - error: [http oritend error](https://github.com/ShogunPanda/http-errors-enhanced)提供的异常函数，有按照[http status code](https://github.com/ShogunPanda/http-errors-enhanced/blob/main/src/errors.ts)的对应快捷异常类。
 - shell: [以js虚拟shell实现](https://github.com/shelljs/shelljs)提供程序接口的shell界面，以使用当前用户维护系统。例如增加本地包的自维护性，因此额外扩展了两个函数(采用的包管理器通过env服务配置):
   - require(pkgName,opt?) async require pkg,如果失败，则install后重试。
   - import(pkgName,opt?) async import es6 pkg，如果失败，则install后重试。
   - pexec(cmdline,opt?) async 异步模式的exec。在执行外部命令时，不卡住主线程。
+  - install(pkgName) async 在主项目目录下，安装指定包。
 - config: node-config加载的对象，除了加载的配置,额外扩展了如下函数([cofing的内建函数](https://github.com/node-config/node-config/wiki/Using-Config-Utilities)):
   - util.isLocal() : [boolean]是否处于本地模式,以允许编辑模式。
   - util.path(string...): [string]返回参数构建的基于运行目录的目录。传入空，返回运行目录。
@@ -183,13 +185,14 @@
     - name: [string] 运行环境人读名称。
     - mname: [string] 运行环境机读名称——此名称也是保存配置的目录名称。
     - local: [boolean] 是否是本地环境，以决定是否加载本地开发模块，有安全隐患，请不要在正式环境下设置此值。
-    - pkg: [string] 采用的包管理器。默认为yarn,可以设置为npm。
+    - pkg: [string] 采用的包管理器。默认为yarn,可以设置为npm或pnpm。
     - index: [string] 采用的全文索引库，设置为false以禁用全文检索。默认为elastic
     - db: [string] 采用的database,设置为false以禁用database support。默认为knex(默认sqlite,远程需要外部配置)
     - share: [string] 采用的快速ipc共享(通常也被用做缓冲),设置为false以禁用ipc。默认为redis。
     - fs: [string] 采用的文件存储，设置为false以禁用文件存储。默认为local。
-    - secure: [string] 采用的安全存储，设置为false以禁用安全存储。默认为false，可选vault。
-    - static: [string] 静态资源存储，设置为false以禁用静态资源服务。默认为local。
+    - vault: [string] 采用的安全存储服务，设置为false以禁用安全存储。默认为false，可选vault。
+    - sso: [string] 采用的单点登录服务(Single-Sign-On)。可选keycloak,casdoor,authelia,zitadel。默认为keycloak
+    - static: [string] 静态资源存储服务，设置为false以禁用静态资源服务。默认为local。
     - deploy: [string|object|boolean] 本地环境下，此配置被忽略，强制采用docker模式。指定部署方式,如果设置为false,则禁止自动部署。按照部署方式将其分为如下三类:
       - native mode: 在指定机器上安装软件，不依赖docker部署。ansible、salt、puppet都属于此类。这种方式无论单机还是大规模集群都可以，包括docker in container mode.
       - single machine docker mode: 单机或者少量机器，只采用docker来简化环境依赖。不采用容器管理服务。本地环境默认为此模式。值为docker。
@@ -201,13 +204,22 @@
 - compress:
   - conf: 参考[压缩配置](https://github.com/fastify/fastify-compress#compress-options)。
 - accepts: [accepts](https://github.com/fastify/fastify-accepts) : 支持与客户端的格式协商。
-- cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/crypto-random-string)。
 - knex-utils: 增加包[knext-utils](https://github.com/knex/knex-utils)用于检查连接(heartbeat)等动作。
 - cookie: [fastify-cookie](https://github.com/fastify/fastify-cookie),提供了cookie支持。启用是因为被session依赖。
   - conf: [有效的配置](https://github.com/fastify/fastify-cookie#options)
 - session: [fastify-session](https://github.com/fastify/session)，如果未配置store，根据env中的share来决定。
   - conf: [有效配置](https://github.com/fastify/session#options)。
     - store: 默认store采用了[connect-redis](https://github.com/tj/connect-redis)。因此store中的配置项依赖connect-redis。
+- keycloak： [keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)提供了keycloak,我们将keycloak-adapter实现为服务，以可以热部署keycloak.
+  - rproxy: 是否将keycloak映射到主站点的目录下。默认开启。
+  - conf: [有效配置](https://github.com/yubinTW/fastify-keycloak-adapter#configuration)
+  - kconf: [keycloak](https://www.keycloak.org/)配置项按照[keycloak docker server](https://www.keycloak.org/server/containers)来配置。默认采用官方镜像。[How to package extensions in a Docker image](https://keycloak.discourse.group/t/how-to-package-extensions-in-a-docker-image/5542)给出如何自定义镜像增加spi。@TODO: 提供集成国内验证spi的image?
+    - superuser: KEYCLOAK_ADMIN
+    - password: KEYCLOAK_ADMIN_PASSWORD
+    - db: -db
+    - features: --features
+    - db-url: --db-url
+
 
 ### 默认关闭
 
@@ -227,5 +239,5 @@
 - [redis](https://redis.io/): redis兼容的内存数据库，本地环境下强制开启。
   - package: 采用的库，默认是[`ioredis`](https://github.com/luin/ioredis),设置为`redis`，则加载[node-redis](https://github.com/redis/node-redis)，两者配置略有不同。
   - conf: [node-redis配置](https://github.com/redis/node-redis/blob/master/docs/client-configuration.md)。[ioredis配置](https://github.com/luin/ioredis#connect-to-redis)。
-- [knex](https://knexjs.org/): 默认采用knex访问数据库。如果未部署数据库，默认采用本地的sqlite3(数据存放在config/active/sqlite3/volumes/data.db)。其它数据库的配置、部署、迁移在图形界面下完成。(不同于knex migrations)
+- [knex](https://knexjs.org/): 默认采用knex访问数据库。如果未部署数据库，默认采用postgres(数据存放在config/active/postgres/volumes/data)。其它数据库的配置、部署、迁移在图形界面下完成。(不同于knex migrations)
   - conf: 参考[knex configuration](https://knexjs.org/guide/#configuration-options)

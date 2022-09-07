@@ -32,11 +32,13 @@
     "fastify": "4.5.3",
     "fastify-cli": "^5.3.0",
     "fastify-https-redirect": "^1.0.4",
+    "fastify-keycloak-adapter": "^1.6.0",
     "fastify-plugin": "^4.2.1",
     "ioredis": "^5.2.3",
     "knex": "^2.3.0",
     "knex-utils": "^5.5.1",
     "node-vault": "^0.9.22",
+    "pg": "^8.8.0",
     "redis": "^4.3.0",
     "sqlite3": "^5.0.11"
   },
