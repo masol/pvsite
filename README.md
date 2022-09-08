@@ -155,8 +155,9 @@
 - shell: [以js虚拟shell实现](https://github.com/shelljs/shelljs)提供程序接口的shell界面，以使用当前用户维护系统。例如增加本地包的自维护性，因此额外扩展了两个函数(采用的包管理器通过env服务配置):
   - require(pkgName,opt?) async require pkg,如果失败，则install后重试。
   - import(pkgName,opt?) async import es6 pkg，如果失败，则install后重试。
-  - pexec(cmdline,opt?) async 异步模式的exec。在执行外部命令时，不卡住主线程。
   - install(pkgName) async 在主项目目录下，安装指定包。
+  - pexec(cmdline,opt?) async 异步模式的exec。在执行外部命令时，不卡住主线程。
+  - expect 引入[nexpect](https://github.com/nodejitsu/nexpect)，方便交互执行子进程，回调模式，需自行转为Promise.
 - config: node-config加载的对象，除了加载的配置,额外扩展了如下函数([cofing的内建函数](https://github.com/node-config/node-config/wiki/Using-Config-Utilities)):
   - util.isLocal() : [boolean]是否处于本地模式,以允许编辑模式。
   - util.path(string...): [string]返回参数构建的基于运行目录的目录。传入空，返回运行目录。
@@ -215,15 +216,21 @@
 - session: [fastify-session](https://github.com/fastify/session)，如果未配置store，根据env中的share来决定。
   - conf: [有效配置](https://github.com/fastify/session#options)。
     - store: 默认store采用了[connect-redis](https://github.com/tj/connect-redis)。因此store中的配置项依赖connect-redis。
-- keycloak： [keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)提供了keycloak,我们将keycloak-adapter实现为服务，以可以热部署keycloak.
-  - rproxy: 是否将keycloak映射到主站点的目录下。默认开启。
+- elastic:
+  - conf: [elastic配置](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-configuration.html)。如果使用docker,通常桌面版的max_map_count不足，临时修改的指令:`sudo sysctl -w vm.max_map_count=262144`。长期生效，修改文件`/etc/sysctl.conf`，在其中添加`vm.max_map_count=262144`。本地环境下默认开启。
+- [redis](https://redis.io/): redis兼容的内存数据库，本地环境下强制开启。
+  - package: 采用的库，默认是[`ioredis`](https://github.com/luin/ioredis),设置为`redis`，则加载[node-redis](https://github.com/redis/node-redis)，两者配置略有不同。
+  - conf: [node-redis配置](https://github.com/redis/node-redis/blob/master/docs/client-configuration.md)。[ioredis配置](https://github.com/luin/ioredis#connect-to-redis)。
+- [knex](https://knexjs.org/): 默认采用knex访问数据库。如果未部署数据库，默认采用[bitnami/postgresql](https://hub.docker.com/r/bitnami/postgresql)，数据存放在docker volumes:pv_postgresql_data。pg数据库与keycloak通过docker composer启动，以命令行方式，动态创建配置文件。
+  - conf: 参考[knex configuration](https://knexjs.org/guide/#configuration-options)。只有在未定义client的时候，才会触发自动部署，此自动部署会忽略keycloak的配置，按照默认部署，默认部署的信息如下:
+    - host: 127.0.0.1
+    - port: 5432
+    - user: postgres
+    - database: app
+    - password: 随机创建16位密码， 保存在config/active/postgres/app.passwd中。其中还保存kc.passwd是为keycloak提供的数据库及用户。
+- keycloak： [keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)提供了keycloak,我们将keycloak-adapter实现为服务，默认热部署[bitnami/keycloak](https://hub.docker.com/r/bitnami/keycloak)。部署时采用pg中的keycloak数据库，数据库密码保存在postgres/kc.passwd。kc的超级用户(admin)密码保存在keycloak/admin.passwd;管理员(manage)密码保存在keycloak/manage.passwd中。默认创建app realm。
+  - rproxy: [string] 将keycloak映射到主站点的目录下,默认kc子目录。给出false禁用这一特性。
   - conf: [有效配置](https://github.com/yubinTW/fastify-keycloak-adapter#configuration)
-  - kconf: [keycloak](https://www.keycloak.org/)配置项按照[keycloak docker server](https://www.keycloak.org/server/containers)来配置。默认采用官方镜像。[How to package extensions in a Docker image](https://keycloak.discourse.group/t/how-to-package-extensions-in-a-docker-image/5542)给出如何自定义镜像增加spi。@TODO: 提供集成国内验证spi的image?
-    - superuser: KEYCLOAK_ADMIN
-    - password: KEYCLOAK_ADMIN_PASSWORD
-    - db: -db
-    - features: --features
-    - db-url: --db-url
 
 
 ### 默认关闭
@@ -238,11 +245,4 @@
   - conf: 参考[使用docker-modem](https://github.com/apocas/docker-modem#getting-started)
 - vault :
   - conf: [node-vault配置项](https://github.com/nodevault/node-vault#init-and-unseal)。
-- elastic:
-  - conf: [elastic配置](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-configuration.html)。如果使用docker,通常桌面版的max_map_count不足，临时修改的指令:`sudo sysctl -w vm.max_map_count=262144`。长期生效，修改文件`/etc/sysctl.conf`，在其中添加`vm.max_map_count=262144`。本地环境下默认开启。
 - [zinc](https://zincsearch.com/): 使用zinsearch执行全文检索。
-- [redis](https://redis.io/): redis兼容的内存数据库，本地环境下强制开启。
-  - package: 采用的库，默认是[`ioredis`](https://github.com/luin/ioredis),设置为`redis`，则加载[node-redis](https://github.com/redis/node-redis)，两者配置略有不同。
-  - conf: [node-redis配置](https://github.com/redis/node-redis/blob/master/docs/client-configuration.md)。[ioredis配置](https://github.com/luin/ioredis#connect-to-redis)。
-- [knex](https://knexjs.org/): 默认采用knex访问数据库。如果未部署数据库，默认采用postgres(数据存放在config/active/postgres/volumes/data)。其它数据库的配置、部署、迁移在图形界面下完成。(不同于knex migrations)
-  - conf: 参考[knex configuration](https://knexjs.org/guide/#configuration-options)
