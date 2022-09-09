@@ -109,11 +109,12 @@
     - default.json 默认项目服务定义文件。
     - :sweat_drops: *production.json* 可选: 产品环境下的覆盖项。
     - :sweat_drops: *development* 可选: 开发环境下的覆盖项。
-    - postgres: postgres的本地目录。
-      - passwd: 内容保存了默认管理员(postgres)的密码，默认数据库为app。
-      - user.passwd: 内容保存了默认keycloak用户的密码，其默认数据库为keycloak。
-      - volumes: 存放数据到本地。
-        - data: 映射到`/var/lib/postgresql/data`，以保存数据。
+    - postgres: postgres的本地目录。数据映射到docker的`local_pv_postgresql_data`中。
+      - kc.passwd: 内容保存了keycloak用(postgres)的密码，默认数据库为keycloak。
+      - app.passwd: 内容保存了app用的密码，其默认数据库为app。
+    - keycloak: keycloak的本地目录。使用postgres数据库。
+      - admin.passwd: 内容保存了admin用户的密码，超级用户。
+      - manage.passwd: 内容保存了manage用的密码，管理员用户。
     - redis: redis的本地目录。
       - volumes: 存放redis stack server的数据。
         - data: 映射到redis的/data，以存放数据。
@@ -132,10 +133,6 @@
           - vault.json vault启动配置.
         - file 本地存储.由vault维护.
         - logs 日志目录,由vault维护.
-    - data 本地环境的数据存放。
-      - db.sqlite sqlite数据库,默认的开发环境数据库。
-      - ftindex 本地[zinsearch](https://zincsearch.com/)的数据目录，默认的开发环境索引器。
-      - redis
 - plugins 由fastify定义的目录，启动时会自动加载其中全部插件。
   - prodvest.js 引入pv-fastify。其它内置工作在pv-fastify中完成。
 - routes 由fastify定义的目录，根据文件创建路由。
@@ -228,10 +225,10 @@
     - user: postgres
     - database: app
     - password: 随机创建16位密码， 保存在config/active/postgres/app.passwd中。其中还保存kc.passwd是为keycloak提供的数据库及用户。
-- keycloak： [keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)提供了keycloak,我们将keycloak-adapter实现为服务，默认热部署[bitnami/keycloak](https://hub.docker.com/r/bitnami/keycloak)。部署时采用pg中的keycloak数据库，数据库密码保存在postgres/kc.passwd。kc的超级用户(admin)密码保存在keycloak/admin.passwd;管理员(manage)密码保存在keycloak/manage.passwd中。默认创建app realm。
-  - rproxy: [string] 将keycloak映射到主站点的目录下,默认kc子目录。给出false禁用这一特性。
-  - conf: [有效配置](https://github.com/yubinTW/fastify-keycloak-adapter#configuration)
-
+- keycloak： [keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)提供了keycloak,我们将keycloak-adapter实现为服务，默认热部署[bitnami/keycloak](https://hub.docker.com/r/bitnami/keycloak)。部署时采用pg中的keycloak数据库，数据库密码保存在postgres/kc.passwd。kc的超级用户(admin)密码保存在keycloak/admin.passwd;管理员(manage)密码保存在keycloak/manage.passwd中。默认创建app realm。keycloak返回的是[KcAdminClient](https://github.com/keycloak/keycloak-nodejs-admin-client)实例对象，已通过验证。并且[fastify-keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)已设置好。preValidation已监听。
+  - proxy: [string] 将keycloak映射到主站点的目录下,默认kc子目录。给出false禁用这一特性。如果是对象，则为[fastify-http-proxy配置](https://github.com/fastify/fastify-http-proxy#options)
+  - conf: [服务器信息](https://github.com/keycloak/keycloak-nodejs-admin-client#usage)。
+  - adapter: [fastify-keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)的配置信息。如果未提供，所需realm为app,clientid为`fastify-server`(内部id保存在keycloak/server.id)。所需clientSecret保存在keycloak/server.cert。
 
 ### 默认关闭
 
