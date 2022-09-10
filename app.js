@@ -38,6 +38,7 @@ module.exports = async function (fastify, opts) {
   })
   fastify.decorate('config', config)
 
+  await fastify.register(require('@fastify/middie'))
   await SOA.decorate(fastify, config, opts)
   // fastify.addHook('onClose',()=>{
   //   fastify.decorate('_', null)

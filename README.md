@@ -90,8 +90,6 @@
 - 配置: 配置信息被保存在consul中。
 - secret: secret信息被保存在vault服务中。
 
-**😄 注意，为了在windows下开发，本地环境未采用容器调度与管理服务。**
-
 ### 规避热部署
 &emsp;&emsp;热部署的开销比你想象的高——甚至包括包的自动安装。由于产品环境下，多个节点在执行。为了规避同时发出的部署请求，需要锁系统支持。因此，每次热部署只有一个调用者会执行，其它排队。采用UI会创建冷部署，而不是热部署。手动配置请尽可能不依赖热部署。
 
@@ -194,7 +192,7 @@
     - share: [string] 采用的快速ipc共享(通常也被用做缓冲),设置为false以禁用ipc。默认为redis。
     - fs: [string] 采用的文件存储，设置为false以禁用文件存储。默认为local。
     - vault: [string] 采用的安全存储服务，设置为false以禁用安全存储。默认为false，可选vault。
-    - sso: [string] 采用的单点登录服务(Single-Sign-On)。可选keycloak,casdoor,authelia,zitadel。默认为keycloak
+    - sso: [string] 采用的单点登录服务(Single-Sign-On)。可选keycloak,casdoor,authelia,zitadel。默认为false。
     - static: [string] 静态资源存储服务，设置为false以禁用静态资源服务。默认为local。
     - deploy: [string|object|boolean] 本地环境下，此配置被忽略，强制采用docker模式。指定部署方式,如果设置为false,则禁止自动部署。按照部署方式将其分为如下三类:
       - native mode: 在指定机器上安装软件，不依赖docker部署。ansible、salt、puppet都属于此类。这种方式无论单机还是大规模集群都可以，包括docker in container mode.
@@ -218,17 +216,13 @@
 - [redis](https://redis.io/): redis兼容的内存数据库，本地环境下强制开启。
   - package: 采用的库，默认是[`ioredis`](https://github.com/luin/ioredis),设置为`redis`，则加载[node-redis](https://github.com/redis/node-redis)，两者配置略有不同。
   - conf: [node-redis配置](https://github.com/redis/node-redis/blob/master/docs/client-configuration.md)。[ioredis配置](https://github.com/luin/ioredis#connect-to-redis)。
-- [knex](https://knexjs.org/): 默认采用knex访问数据库。如果未部署数据库，默认采用[bitnami/postgresql](https://hub.docker.com/r/bitnami/postgresql)，数据存放在docker volumes:pv_postgresql_data。pg数据库与keycloak通过docker composer启动，以命令行方式，动态创建配置文件。
-  - conf: 参考[knex configuration](https://knexjs.org/guide/#configuration-options)。只有在未定义client的时候，才会触发自动部署，此自动部署会忽略keycloak的配置，按照默认部署，默认部署的信息如下:
+- [knex](https://knexjs.org/): 默认采用knex访问数据库。如果未部署数据库，默认采用[bitnami/postgresql](https://hub.docker.com/r/bitnami/postgresql)，数据存放在docker volumes:pv_postgresql_data。
+  - conf: 参考[knex configuration](https://knexjs.org/guide/#configuration-options)。只有在未定义client的时候，才会触发自动部署，自动部署会忽略keycloak的配置，按照默认部署，默认部署的信息如下:
     - host: 127.0.0.1
     - port: 5432
     - user: postgres
     - database: app
-    - password: 随机创建16位密码， 保存在config/active/postgres/app.passwd中。其中还保存kc.passwd是为keycloak提供的数据库及用户。
-- keycloak： [keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)提供了keycloak,我们将keycloak-adapter实现为服务，默认热部署[bitnami/keycloak](https://hub.docker.com/r/bitnami/keycloak)。部署时采用pg中的keycloak数据库，数据库密码保存在postgres/kc.passwd。kc的超级用户(admin)密码保存在keycloak/admin.passwd;管理员(manage)密码保存在keycloak/manage.passwd中。默认创建app realm。keycloak返回的是[KcAdminClient](https://github.com/keycloak/keycloak-nodejs-admin-client)实例对象，已通过验证。并且[fastify-keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)已设置好。preValidation已监听。
-  - proxy: [string] 将keycloak映射到主站点的目录下,默认kc子目录。给出false禁用这一特性。如果是对象，则为[fastify-http-proxy配置](https://github.com/fastify/fastify-http-proxy#options)
-  - conf: [服务器信息](https://github.com/keycloak/keycloak-nodejs-admin-client#usage)。
-  - adapter: [fastify-keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)的配置信息。如果未提供，所需realm为app,clientid为`fastify-server`(内部id保存在keycloak/server.id)。所需clientSecret保存在keycloak/server.cert。
+    - password: 随机创建16位密码， 保存在config/active/postgres/app.passwd中。其中还保存kc.passwd是为keycloak提供的数据库及用户。由于AI不能调整基础环境(基础环境以adapter的方式提供多个)，为灵活起见，不再深度绑定keycloak，而是采用passport。如果需要集成keycloak这样的sso,暴露LDAP接口做为kc的provider来集成。
 
 ### 默认关闭
 
@@ -243,3 +237,7 @@
 - vault :
   - conf: [node-vault配置项](https://github.com/nodevault/node-vault#init-and-unseal)。
 - [zinc](https://zincsearch.com/): 使用zinsearch执行全文检索。
+- keycloak： [keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)提供了keycloak,我们将keycloak-adapter实现为服务，默认热部署[bitnami/keycloak](https://hub.docker.com/r/bitnami/keycloak)。部署时采用pg中的keycloak数据库，数据库密码保存在postgres/kc.passwd。kc的超级用户(admin)密码保存在keycloak/admin.passwd;管理员(manage)密码保存在keycloak/manage.passwd中。默认创建app realm。keycloak返回的是[KcAdminClient](https://github.com/keycloak/keycloak-nodejs-admin-client)实例对象，已通过验证。并且[fastify-keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)已设置好。preValidation已监听。
+  - proxy: [string] 将keycloak映射到主站点的目录下,默认kc子目录。给出false禁用这一特性。如果是对象，则为[fastify-http-proxy配置](https://github.com/fastify/fastify-http-proxy#options)
+  - conf: [服务器信息](https://github.com/keycloak/keycloak-nodejs-admin-client#usage)。
+  - adapter: [fastify-keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)的配置信息。如果未提供，所需realm为app,clientid为`fastify-server`(内部id保存在keycloak/server.id)。所需clientSecret保存在keycloak/server.cert。
