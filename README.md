@@ -192,7 +192,8 @@
     - share: [string] 采用的快速ipc共享(通常也被用做缓冲),设置为false以禁用ipc。默认为redis。
     - fs: [string] 采用的文件存储，设置为false以禁用文件存储。默认为local。
     - vault: [string] 采用的安全存储服务，设置为false以禁用安全存储。默认为false，可选vault。
-    - sso: [string] 采用的单点登录服务(Single-Sign-On)。可选keycloak,casdoor,authelia,zitadel。默认为false。
+    - sso: [string] 采用的单点登录服务(Single-Sign-On)。可选keycloak,casdoor,authelia,zitadel。默认为passort。虽然passport不是一个sso server，但可以实现并模拟出sso效果。
+    - bidco: [string] 采用的双向通信(bidirectional communication)。默认为false。可以设置为[socketio](https://socket.io/)。默认使用redis adapter。
     - static: [string] 静态资源存储服务，设置为false以禁用静态资源服务。默认为local。
     - deploy: [string|object|boolean] 本地环境下，此配置被忽略，强制采用docker模式。指定部署方式,如果设置为false,则禁止自动部署。按照部署方式将其分为如下三类:
       - native mode: 在指定机器上安装软件，不依赖docker部署。ansible、salt、puppet都属于此类。这种方式无论单机还是大规模集群都可以，包括docker in container mode.
@@ -223,6 +224,7 @@
     - user: postgres
     - database: app
     - password: 随机创建16位密码， 保存在config/active/postgres/app.passwd中。其中还保存kc.passwd是为keycloak提供的数据库及用户。由于AI不能调整基础环境(基础环境以adapter的方式提供多个)，为灵活起见，不再深度绑定keycloak，而是采用passport。如果需要集成keycloak这样的sso,暴露LDAP接口做为kc的provider来集成。
+- [passport](https://www.passportjs.org/): passport登录支持。采用[fastify-passport](https://github.com/fastify/fastify-passport),并内建支持了一些Strategy，可以直接配置使用。
 
 ### 默认关闭
 
@@ -241,3 +243,7 @@
   - proxy: [string] 将keycloak映射到主站点的目录下,默认kc子目录。给出false禁用这一特性。如果是对象，则为[fastify-http-proxy配置](https://github.com/fastify/fastify-http-proxy#options)
   - conf: [服务器信息](https://github.com/keycloak/keycloak-nodejs-admin-client#usage)。
   - adapter: [fastify-keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)的配置信息。如果未提供，所需realm为app,clientid为`fastify-server`(内部id保存在keycloak/server.id)。所需clientSecret保存在keycloak/server.cert。
+- [socketio](https://socket.io/)。
+  - conf: [socket.io server options](https://socket.io/docs/v4/server-options/)。
+  - adapter: 采用socket.io在服务器初始化之后，通过`io.adapter`来设置adapter。
+- [libp2p](https://libp2p.io/)支持。在服务器端使用[js-libp2p](https://github.com/libp2p/js-libp2p)启动一个固定node,方便客户端bootstrap，通常用于支持视频p2p通话。这是从[js-libp2p-webrtc-star](https://github.com/libp2p/js-libp2p-webrtc-star)改写的，原生利用hapi及socketio。
