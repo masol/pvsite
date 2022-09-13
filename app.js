@@ -29,6 +29,12 @@ if (fastiConf.http2 || fastiConf.https) {
 module.exports = async function (fastify, opts) {
   // Place here your custom code!
 
+  // const SystemJS = require('systemjs')
+  // console.log('SystemJS=', SystemJS.System)
+  // const test = await import('https://www.prodvest.com/localibs/pvschema.m.js').catch(e => {
+  //   console.log('import from net error:', e)
+  // })
+  // console.log('test module=', test)
   // 在将shell移至库函数后，需要在主项目中import/require。这是一个临时解决方案。
   fastify.decorate('require', (pkgName) => {
     return require(pkgName)
@@ -38,7 +44,7 @@ module.exports = async function (fastify, opts) {
   })
   fastify.decorate('config', config)
 
-  await fastify.register(require('@fastify/middie'))
+  // await fastify.register(require('@fastify/middie'))
   await SOA.decorate(fastify, config, opts)
   // fastify.addHook('onClose',()=>{
   //   fastify.decorate('_', null)
@@ -65,14 +71,14 @@ module.exports = async function (fastify, opts) {
   // those should be support plugins that are reused
   // through your application
   fastify.register(AutoLoad, {
-    dir: path.join(__dirname, 'plugins'),
+    dir: path.join(__dirname, 'src/plugins'),
     options: Object.assign({}, opts)
   })
 
   // This loads all plugins defined in routes
   // define your routes in one of these
   fastify.register(AutoLoad, {
-    dir: path.join(__dirname, 'routes'),
+    dir: path.join(__dirname, 'src/routes'),
     options: Object.assign({}, opts)
   })
 }

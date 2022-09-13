@@ -131,15 +131,17 @@
           - vault.json vault启动配置.
         - file 本地存储.由vault维护.
         - logs 日志目录,由vault维护.
-- plugins 由fastify定义的目录，启动时会自动加载其中全部插件。
-  - prodvest.js 引入pv-fastify。其它内置工作在pv-fastify中完成。
-- routes 由fastify定义的目录，根据文件创建路由。
-- dev 由编辑器维护的数据目录。
+- src: 使用[npm init fastify](https://www.npmjs.com/package/create-fastify)创建的资源，被挪到此目录。
+  - plugins 由fastify定义的目录，启动时会自动加载其中全部插件。
+    - prodvest.js 引入pv-fastify。其它内置工作在pv-fastify中完成。
+  - routes 由fastify定义的目录，根据文件创建路由。
   - assets: 静态资源源代码，会整个的拷贝到root目录下。根据后缀选择资源处理方式。
+  - frontend 由pv-fastify定义，结构与sveltekit相同，创建的客户端代码放入此目录下。
+  - root 静态资源web入口。不要直接向这里写入内容，这是编译之后存放客户端静态资源的地方。不保存在git中。这里也是sveltekit build的结果存放地。
+  - test 服务器测试文件存放目录。
+- pvdev 由编辑器维护的数据目录
+  - tools: 提供一些常用批处理命令。
   - docs: 文档入口
-- root 静态资源web入口。不要直接向这里写入内容，这是编译之后存放客户端静态资源的地方。不保存在git中。
-- frontend 由pv-fastify定义，结构与sveltekit相同，创建的客户端代码放入此目录下。
-  - build pv-fastify会以这里为根目录启动fastify-static插件。这里也是sveltekit build的结果存放地。
 
 # fastify扩展说明(decorate)
 
@@ -195,6 +197,7 @@
     - sso: [string] 采用的单点登录服务(Single-Sign-On)。可选keycloak,casdoor,authelia,zitadel。默认为passort。虽然passport不是一个sso server，但可以实现并模拟出sso效果。
     - bidco: [string] 采用的双向通信(bidirectional communication)。默认为false。可以设置为[socketio](https://socket.io/)。默认使用redis adapter。
     - static: [string] 静态资源存储服务，设置为false以禁用静态资源服务。默认为local。
+    - pipeline: [string] 任务流管理器，默认为false。可选外部工作流管理服务:kafka,airflow
     - deploy: [string|object|boolean] 本地环境下，此配置被忽略，强制采用docker模式。指定部署方式,如果设置为false,则禁止自动部署。按照部署方式将其分为如下三类:
       - native mode: 在指定机器上安装软件，不依赖docker部署。ansible、salt、puppet都属于此类。这种方式无论单机还是大规模集群都可以，包括docker in container mode.
       - single machine docker mode: 单机或者少量机器，只采用docker来简化环境依赖。不采用容器管理服务。本地环境默认为此模式。值为docker。
@@ -247,3 +250,4 @@
   - conf: [socket.io server options](https://socket.io/docs/v4/server-options/)。
   - adapter: 采用socket.io在服务器初始化之后，通过`io.adapter`来设置adapter。
 - [libp2p](https://libp2p.io/)支持。在服务器端使用[js-libp2p](https://github.com/libp2p/js-libp2p)启动一个固定node,方便客户端bootstrap，通常用于支持视频p2p通话。这是从[js-libp2p-webrtc-star](https://github.com/libp2p/js-libp2p-webrtc-star)改写的，原生利用hapi及socketio。
+- [mindsdb](https://github.com/mindsdb/mindsdb_js_sdk)。通过[mindsdb](https://github.com/mindsdb/mindsdb)来支持基于数据库数据集的训练与预测。需启动mindsdb服务器(cpu/gpu计算密集型)。
