@@ -4,6 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const AutoLoad = require('@fastify/autoload')
 const SOA = require('pv-soa')
+const fp = require('fastify-plugin')
 
 process.env.NODE_CONFIG_DIR = process.env.NODE_CONFIG_DIR || path.join(__dirname, 'config', 'active')
 const config = require('config')
@@ -26,7 +27,7 @@ if (fastiConf.http2 || fastiConf.https) {
   fastiConf.https.cert = loadCtx(fastiConf.https.cert, path.join(basePath, 'https.crt'))
 }
 
-module.exports = async function (fastify, opts) {
+module.exports = fp(async function (fastify, opts) {
   // Place here your custom code!
 
   // const SystemJS = require('systemjs')
@@ -81,7 +82,7 @@ module.exports = async function (fastify, opts) {
     dir: path.join(__dirname, 'src/routes'),
     options: Object.assign({}, opts)
   })
-}
+}, { fastify: '4.x' })
 
 // console.log('fastiConf=', fastiConf)
 module.exports.options = fastiConf
