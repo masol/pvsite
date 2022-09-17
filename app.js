@@ -30,7 +30,6 @@ if (fastiConf.http2 || fastiConf.https) {
 module.exports = fp(async function (fastify, opts) {
   // Place here your custom code!
 
-  console.log('fastify=', fastify)
   // const SystemJS = require('systemjs')
   // console.log('SystemJS=', SystemJS.System)
   // const test = await import('https://www.prodvest.com/localibs/pvschema.m.js').catch(e => {
