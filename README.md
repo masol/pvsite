@@ -228,6 +228,22 @@
     - database: app
     - password: 随机创建16位密码， 保存在config/active/postgres/app.passwd中。其中还保存kc.passwd是为keycloak提供的数据库及用户。由于AI不能调整基础环境(基础环境以adapter的方式提供多个)，为灵活起见，不再深度绑定keycloak，而是采用passport。如果需要集成keycloak这样的sso,暴露LDAP接口做为kc的provider来集成。
 - [passport](https://www.passportjs.org/): passport登录支持。采用[fastify-passport](https://github.com/fastify/fastify-passport),并内建支持了一些Strategy，可以直接配置使用。
+- [formbody](https://github.com/fastify/fastify-formbody)，增加对`application/x-www-form-urlencoded`上传格式的支持。
+  - conf: [formbody options](https://github.com/fastify/fastify-formbody#options)。如果不配置parser,默认引入qs来支持嵌套parser。
+- [multipart](https://github.com/fastify/fastify-multipart),增加对`formdata/multipart`支持，以支持文件上传。
+  - conf: 支持的有效配置参考[源码](https://github.com/fastify/fastify-multipart/blob/master/index.js),摘录如下:
+    - addToBody boolean 默认为false。是否将上传的值，添加到req.body上。这可以方便使用[fastify的schema验证](https://www.fastify.io/docs/latest/Reference/Validation-and-Serialization/)
+    - attachFieldsToBody boolean|string 默认false，将指定名称的field添加到body上。
+    - sharedSchemaId 只有addToBody或attachFieldsToBody有非空值才有效。会定义一个此名称的schema,在后续自身的验证schema中可以引用。
+    - limits: // 设置上传限制。查看[busboy配置](https://github.com/fastify/busboy#busboy-methods)
+      - fieldNameSize: default 100, // Max field name size in bytes
+      - fieldSize: 1M(1024 x 1024),     // Max field value size in bytes
+      - fields: Infinity,    // Max number of non-file fields
+      - fileSize: Infinity,  // For multipart forms, the max file size in bytes
+      - files: Infinity,           // Max number of file fields
+      - parts: Infinity,  // For multipart forms, the max number of parts (fields + files).
+      - headerPairs: 2000   // Max number of header key=>value pairs
+      - headerSize: 81920   // For multipart forms, the max size of a multipart header
 
 ### 默认关闭
 
@@ -251,3 +267,9 @@
   - adapter: 采用socket.io在服务器初始化之后，通过`io.adapter`来设置adapter。
 - [libp2p](https://libp2p.io/)支持。在服务器端使用[js-libp2p](https://github.com/libp2p/js-libp2p)启动一个固定node,方便客户端bootstrap，通常用于支持视频p2p通话。这是从[js-libp2p-webrtc-star](https://github.com/libp2p/js-libp2p-webrtc-star)改写的，原生利用hapi及socketio。
 - [mindsdb](https://github.com/mindsdb/mindsdb_js_sdk)。通过[mindsdb](https://github.com/mindsdb/mindsdb)来支持基于数据库数据集的训练与预测。需启动mindsdb服务器(cpu/gpu计算密集型)。
+- [bree](https://github.com/breejs/bree)。本地任务子系统支持。
+  - conf: [fastify-bree配置](https://github.com/climba03003/fastify-bree#optionscustomoptions)。
+    - customOptions: [bree配置](https://github.com/breejs/bree#instance-options)。
+- [any-schema](https://github.com/fastify/any-schema-you-like)
+  - path: 指定需要require的文件，暴露一个函数，调用之得到schemas数组。参考[any-schema使用](https://github.com/fastify/any-schema-you-like#usage)
+  - conf: 预定义的schema，会与path中的schema合并。
