@@ -138,10 +138,14 @@
   - assets: 静态资源源代码，会整个的拷贝到root目录下。根据后缀选择资源处理方式。
   - frontend 由pv-fastify定义，结构与sveltekit相同，创建的客户端代码放入此目录下。
   - root 静态资源web入口。不要直接向这里写入内容，这是编译之后存放客户端静态资源的地方。不保存在git中。这里也是sveltekit build的结果存放地。
+  - svelte: svelte的源代码。
   - test 服务器测试文件存放目录。
 - pvdev 由编辑器维护的数据目录
   - tools: 提供一些常用批处理命令。
-  - docs: 文档入口
+  - schemas: 保存系统定义的业务级变量schma.
+  - fsms: 引用业务级变量的有限状态机，事件(transition)通常为人类动作。采用[xstate](https://xstate.js.org/)。
+  - dps: [数据流处理](https://en.wikipedia.org/wiki/Data_processing)定义,定义数据依赖及处理流。采用[litegraph.js](https://github.com/jagenjo/litegraph.js)——类似[nodered编辑器](https://nodered.org/)
+  - acl: 访问控制。采用[casl](https://casl.js.org/v6/en)。
 
 # fastify扩展说明(decorate)
 
@@ -155,7 +159,7 @@
   - install(pkgName) async 在主项目目录下，安装指定包。
   - pexec(cmdline,opt?) async 异步模式的exec。在执行外部命令时，不卡住主线程。
   - expect 引入[nexpect](https://github.com/nodejitsu/nexpect)，方便交互执行子进程，回调模式，需自行转为Promise.
-- config: node-config加载的对象，除了加载的配置,额外扩展了如下函数([cofing的内建函数](https://github.com/node-config/node-config/wiki/Using-Config-Utilities)):
+- config: node-config加载的对象，除了加载的配置,额外扩展了如下函数([cofing的内建函数](https://github.com/node-config/node-config/wiki/Using-Config-Utilities))。所有插件/对象在加载时，需要把默认值写入config(如果config未指定)，后续请求服务时，可以通过config直接获取配置。(或者通过获取服务对象，来获取配置？)
   - util.isLocal() : [boolean]是否处于本地模式,以允许编辑模式。
   - util.path(string...): [string]返回参数构建的基于运行目录的目录。传入空，返回运行目录。
   - util.dget(path,def={}): 获取指定路径的配置，如果不存在，则返回def.

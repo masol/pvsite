@@ -27,6 +27,16 @@ if (fastiConf.http2 || fastiConf.https) {
   fastiConf.https.cert = loadCtx(fastiConf.https.cert, path.join(basePath, 'https.crt'))
 }
 
+if (!fastiConf.ajv) {
+  fastiConf.ajv = {
+    plugins: [
+      require('ajv-merge-patch'),
+      require('ajv-formats'),
+      require('ajv-errors')
+    ]
+  }
+}
+
 module.exports = fp(async function (fastify, opts) {
   // Place here your custom code!
 
