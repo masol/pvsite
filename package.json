@@ -9,6 +9,7 @@
   "scripts": {
     "test": "tap \"test/**/*.test.js\"",
     "start": "fastify start -l info -o app.js",
+    "cmd": "fastify start -T 0 -s cmd.sock -l info -o app.js -- --cmd",
     "dev": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-network-imports\" fastify start -w --ignoreWatch=\"config pvdev src/frontend\" -l debug -P -o app.js"
   },
   "keywords": [],

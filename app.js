@@ -38,6 +38,11 @@ if (!fastiConf.ajv) {
 }
 
 module.exports = fp(async function (fastify, opts) {
+  if (opts.cmd) {
+    // 由于fastify-cli无法设置additionalOptions，改为监听random socks.see: https://github.com/fastify/fastify-cli/blob/c694d12aa14d53bad93da5541ff281e79e9f337f/start.js#L152
+    fastiConf.address = undefined
+    fastify.decorate('runcmd', opts)
+  }
   // Place here your custom code!
 
   // const SystemJS = require('systemjs')
