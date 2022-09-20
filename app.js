@@ -42,6 +42,21 @@ module.exports = fp(async function (fastify, opts) {
     // 由于fastify-cli无法设置additionalOptions，改为监听random socks.see: https://github.com/fastify/fastify-cli/blob/c694d12aa14d53bad93da5541ff281e79e9f337f/start.js#L152
     fastiConf.address = undefined
     fastify.decorate('runcmd', opts)
+
+    // 命令模式，添加onReady hook,并等到opts的deps结束。
+    fastify.addHook('onReady', async function () {
+      setTimeout(async () => {
+        const deps = opts.deps || []
+        await Promise.all(deps)
+        await fastify.$.delay(100)
+        let exitCode = 0
+        await fastify.close().catch(e => {
+          console.log('退出命令模式时发生错误:', e)
+          exitCode = 1
+        })
+        process.exit(exitCode)
+      }, 1000)
+    })
   }
   // Place here your custom code!
 
@@ -86,14 +101,14 @@ module.exports = fp(async function (fastify, opts) {
   // This loads all plugins defined in plugins
   // those should be support plugins that are reused
   // through your application
-  fastify.register(AutoLoad, {
+  await fastify.register(AutoLoad, {
     dir: path.join(__dirname, 'src/plugins'),
     options: Object.assign({}, opts)
   })
 
   // This loads all plugins defined in routes
   // define your routes in one of these
-  fastify.register(AutoLoad, {
+  await fastify.register(AutoLoad, {
     dir: path.join(__dirname, 'src/routes'),
     options: Object.assign({}, opts)
   })

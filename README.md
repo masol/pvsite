@@ -42,7 +42,7 @@
 &emsp;&emsp;借鉴[drush](https://www.drush.org/latest/)的概念，提供了命令行`npm run cmd XXX -- --param=value`。自动部署未来将取消。目前提供的命令如下:
 - init: 部署并确保数据库schema同步。
 - deploy: 部署运行环境。额外参数: part=XXXX,XXX
-- migrate: 维护数据库，默认全部。额外参数:table=XXX,XXX
+- migrate: 维护数据库，默认全部。额外参数:-- --down --force --all 参考auth模块的文档。
 
 # 主要概念
 
@@ -146,6 +146,7 @@
   - frontend 由pv-fastify定义，结构与sveltekit相同，创建的客户端代码放入此目录下。
   - root 静态资源web入口。不要直接向这里写入内容，这是编译之后存放客户端静态资源的地方。不保存在git中。这里也是sveltekit build的结果存放地。
   - svelte: svelte的源代码。
+  - cmds: 命令实现的源代码。
   - test 服务器测试文件存放目录。
 - pvdev 由编辑器维护的数据目录
   - tools: 提供一些常用批处理命令。
