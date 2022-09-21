@@ -9,7 +9,7 @@
   "scripts": {
     "test": "tap \"test/**/*.test.js\"",
     "start": "fastify start -l info -o app.js",
-    "cmd": "fastify start -T 0 -s cmd.sock -l info -o app.js -- --cmd",
+    "cmd": "fastify start -T 0 -s cmd.sock -l info -P -o app.js -- --cmd",
     "dev": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-network-imports\" fastify start -w --ignoreWatch=\"config pvdev src/frontend\" -l debug -P -o app.js"
   },
   "keywords": [],
@@ -49,6 +49,7 @@
     "ioredis": "^5.2.3",
     "knex": "^2.3.0",
     "knex-utils": "^5.5.1",
+    "objection": "^3.0.1",
     "passport-local": "^1.0.0",
     "pg": "^8.8.0",
     "qs": "^6.11.0",

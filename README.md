@@ -142,6 +142,7 @@
   - plugins 由fastify定义的目录，启动时会自动加载其中全部插件。
     - prodvest.js 引入pv-fastify。其它内置工作在pv-fastify中完成。
   - routes 由fastify定义的目录，根据文件创建路由。
+  - models objection.js所维护的模型。
   - assets: 静态资源源代码，会整个的拷贝到root目录下。根据后缀选择资源处理方式。
   - frontend 由pv-fastify定义，结构与sveltekit相同，创建的客户端代码放入此目录下。
   - root 静态资源web入口。不要直接向这里写入内容，这是编译之后存放客户端静态资源的地方。不保存在git中。这里也是sveltekit build的结果存放地。
@@ -159,7 +160,9 @@
 
 - _ : [lodash对象](https://lodash.com/) : 被内建添加，不能移除。内部代码依赖lodash.
   - cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/crypto-random-string)。
+  - glob: 扩展增加了[glob](https://www.npmjs.com/package/glob)。
 - $ : [promise-utils对象](https://github.com/blend/promise-utils)及[@supercharge/goodies](https://superchargejs.com/docs/3.x/goodies#using-goodie-methods) : 被内建支持，不能移除。内部代码依赖此库。一些优秀的promise工具库，例如[pify系列](https://github.com/sindresorhus/pify)未加入，如果需要，以普通库方式自行加载。
+  - glob: [glob](https://www.npmjs.com/package/glob)的Promise版本。
 - error: [http oritend error](https://github.com/ShogunPanda/http-errors-enhanced)提供的异常函数，有按照[http status code](https://github.com/ShogunPanda/http-errors-enhanced/blob/main/src/errors.ts)的对应快捷异常类。
 - shell: [以js虚拟shell实现](https://github.com/shelljs/shelljs)提供程序接口的shell界面，以使用当前用户维护系统。例如增加本地包的自维护性，因此额外扩展了两个函数(采用的包管理器通过env服务配置):
   - require(pkgName,opt?) async require pkg,如果失败，则install后重试。
@@ -239,6 +242,7 @@
     - user: postgres
     - database: app
     - password: 随机创建16位密码， 保存在config/active/postgres/app.passwd中。其中还保存kc.passwd是为keycloak提供的数据库及用户。由于AI不能调整基础环境(基础环境以adapter的方式提供多个)，为灵活起见，不再深度绑定keycloak，而是采用passport。如果需要集成keycloak这样的sso,暴露LDAP接口做为kc的provider来集成。
+- [objection](https://vincit.github.io/objection.js/)。基于knex的ORM。需要自行录入和维护Model.扩展增加了`store`成员以保存系统有效的Model类。
 - [passport](https://www.passportjs.org/): passport登录支持。采用[fastify-passport](https://github.com/fastify/fastify-passport),并内建支持了一些Strategy，可以直接配置使用。
 - [formbody](https://github.com/fastify/fastify-formbody)，增加对`application/x-www-form-urlencoded`上传格式的支持。
   - conf: [formbody options](https://github.com/fastify/fastify-formbody#options)。如果不配置parser,默认引入qs来支持嵌套parser。
@@ -256,6 +260,7 @@
       - parts: Infinity,  // For multipart forms, the max number of parts (fields + files).
       - headerPairs: 2000   // Max number of header key=>value pairs
       - headerSize: 81920   // For multipart forms, the max size of a multipart header
+- auth: 用于支持用户管理的模块。参考pv-auth的代码及文档。
 
 ### 默认关闭
 
