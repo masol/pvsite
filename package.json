@@ -34,7 +34,6 @@
     "@fastify/static": "^6.5.0",
     "@keycloak/keycloak-admin-client": "^19.0.2",
     "@socket.io/redis-adapter": "^7.2.0",
-    "ajv-errors": "^3.0.0",
     "ajv-formats": "^2.1.1",
     "ajv-merge-patch": "^5.0.1",
     "config": "^3.3.7",

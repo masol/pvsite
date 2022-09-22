@@ -110,7 +110,7 @@
 - config 由pv-fastify定义的目录，不会加入到git中，存放服务定义。每个子目录为一个运行环境。应用配置由[node-config](https://github.com/node-config/node-config)来处理，请参考其文档了解支持的格式及使用方式。
   - :sweat_drops: envs.json 一个数组，定义了全部运行环境，方便admin快速处理，无需从目录中重构。local为本地。
   - active 符号链接，链接到当前有效的运行环境。
-  - local 本地运行环境：应用，数据库等配置信息。(下方目录都是默认值，如果更改配置文件，下方内容可能失效)
+  - dev 开发运行环境：应用，数据库等配置信息。(下方目录都是默认值，如果更改配置文件，下方内容可能失效)
     - default.json 默认项目服务定义文件。
     - :sweat_drops: *production.json* 可选: 产品环境下的覆盖项。
     - :sweat_drops: *development* 可选: 开发环境下的覆盖项。
@@ -139,22 +139,24 @@
         - file 本地存储.由vault维护.
         - logs 日志目录,由vault维护.
 - src: 使用[npm init fastify](https://www.npmjs.com/package/create-fastify)创建的资源，被挪到此目录。
-  - plugins 由fastify定义的目录，启动时会自动加载其中全部插件。
+  - helper: 将辅助说明类代码放入这里。
+    - models objection.js所维护的模型。
+    - schemas 用于fastify验证的schema保存在这里。
+    - assets: 静态资源源代码，会整个的拷贝到root目录下。根据后缀选择资源处理方式。
+    - root 静态资源web入口。不要直接向这里写入内容，这是编译之后存放客户端静态资源的地方。不保存在git中。这里也是sveltekit build的结果存放地。
+  - plugins 由fastify定义的目录，启动时会自动加载其中全部插件。(只在主项目中自动遍历，模块中需要手动遍历)
     - prodvest.js 引入pv-fastify。其它内置工作在pv-fastify中完成。
-  - routes 由fastify定义的目录，根据文件创建路由。
-  - models objection.js所维护的模型。
-  - assets: 静态资源源代码，会整个的拷贝到root目录下。根据后缀选择资源处理方式。
-  - frontend 由pv-fastify定义，结构与sveltekit相同，创建的客户端代码放入此目录下。
-  - root 静态资源web入口。不要直接向这里写入内容，这是编译之后存放客户端静态资源的地方。不保存在git中。这里也是sveltekit build的结果存放地。
+  - routes 由fastify定义的目录，根据文件创建路由。(只在主项目中自动遍历，模块中需要手动遍历)
   - svelte: svelte的源代码。
-  - cmds: 命令实现的源代码。
-  - test 服务器测试文件存放目录。
+  - cmds: 命令实现。
+  - test 测试文件存放目录。
 - pvdev 由编辑器维护的数据目录
   - tools: 提供一些常用批处理命令。
   - schemas: 保存系统定义的业务级变量schma.
   - fsms: 引用业务级变量的有限状态机，事件(transition)通常为人类动作。采用[xstate](https://xstate.js.org/)。
   - dps: [数据流处理](https://en.wikipedia.org/wiki/Data_processing)定义,定义数据依赖及处理流。采用[litegraph.js](https://github.com/jagenjo/litegraph.js)——类似[nodered编辑器](https://nodered.org/)
   - acl: 访问控制。采用[casl](https://casl.js.org/v6/en)。
+  - openapi: 使用openapi规范定义接口。
 
 # fastify扩展说明(decorate)
 
@@ -163,15 +165,16 @@
   - glob: 扩展增加了[glob](https://www.npmjs.com/package/glob)。
 - $ : [promise-utils对象](https://github.com/blend/promise-utils)及[@supercharge/goodies](https://superchargejs.com/docs/3.x/goodies#using-goodie-methods) : 被内建支持，不能移除。内部代码依赖此库。一些优秀的promise工具库，例如[pify系列](https://github.com/sindresorhus/pify)未加入，如果需要，以普通库方式自行加载。
   - glob: [glob](https://www.npmjs.com/package/glob)的Promise版本。
+- s : [underscore.string](https://github.com/esamattis/underscore.string)。并在其下以名称空间的方式扩展了:
+  - v : [validator.js](https://github.com/validatorjs/validator.js)。这些validator同时以format方式加入了[fastify内建ajv instance](https://ajv.js.org/)。
 - error: [http oritend error](https://github.com/ShogunPanda/http-errors-enhanced)提供的异常函数，有按照[http status code](https://github.com/ShogunPanda/http-errors-enhanced/blob/main/src/errors.ts)的对应快捷异常类。
 - shell: [以js虚拟shell实现](https://github.com/shelljs/shelljs)提供程序接口的shell界面，以使用当前用户维护系统。例如增加本地包的自维护性，因此额外扩展了两个函数(采用的包管理器通过env服务配置):
   - require(pkgName,opt?) async require pkg,如果失败，则install后重试。
   - import(pkgName,opt?) async import es6 pkg，如果失败，则install后重试。
   - install(pkgName) async 在主项目目录下，安装指定包。
   - pexec(cmdline,opt?) async 异步模式的exec。在执行外部命令时，不卡住主线程。
-  - expect 引入[nexpect](https://github.com/nodejitsu/nexpect)，方便交互执行子进程，回调模式，需自行转为Promise.
 - config: node-config加载的对象，除了加载的配置,额外扩展了如下函数([cofing的内建函数](https://github.com/node-config/node-config/wiki/Using-Config-Utilities))。所有插件/对象在加载时，需要把默认值写入config(如果config未指定)，后续请求服务时，可以通过config直接获取配置。(或者通过获取服务对象，来获取配置？)
-  - util.isLocal() : [boolean]是否处于本地模式,以允许编辑模式。
+  - util.isDev() : [boolean]是否处于开发模式,以允许编辑模式。
   - util.path(string...): [string]返回参数构建的基于运行目录的目录。传入空，返回运行目录。
   - util.dget(path,def={}): 获取指定路径的配置，如果不存在，则返回def.
   - util.contain(string,string) : 给定属性路径下，如果是一个数组，是否包含指定的值。
@@ -183,6 +186,9 @@
   - async load(serviceName,SDL) 解析SDL定义，创建及注册serviceName。多次调用只有首次会执行真正的加载任务。
   - async defSrv(serviceName,SDL) 获取内建支持的服务，为方便当前放在pv-fastify包中，未来本接口移除，放入pv-soa包中。
   - async reg(serviceName,{inst,loader}) 内部函数，为soa注册可用服务。
+  - model(base) async 扫描base下的全部js文件，将其当作objection的模型定义加载。
+  - schema(base) async 扫描base下的全部json文件，将其当作schema注册进入fastify。
+  - route(base) async 扫描base下的全部js文件，将其当作route注册进入fastify。
 
 # 服务与配置
 
@@ -202,7 +208,8 @@
   - conf
     - name: [string] 运行环境人读名称。
     - mname: [string] 运行环境机读名称——此名称也是保存配置的目录名称。
-    - local: [boolean] 是否是本地环境，以决定是否加载本地开发模块，有安全隐患，请不要在正式环境下设置此值。
+    - dev: [boolean] 是否是开发环境，以决定是否加载开发模块，有安全隐患，请不要在正式环境下设置此值。
+    - locale: [string] 默认locale(`zh-CN`).在validator时用到。
     - pkg: [string] 采用的包管理器。默认为yarn,可以设置为npm或pnpm。
     - index: [string] 采用的全文索引库，设置为false以禁用全文检索。默认为elastic
     - db: [string] 采用的database,设置为false以禁用database support。默认为knex(默认sqlite,远程需要外部配置)

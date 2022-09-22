@@ -32,7 +32,7 @@ if (!fastiConf.ajv) {
     plugins: [
       require('ajv-merge-patch'),
       require('ajv-formats'),
-      require('ajv-errors')
+      SOA.ajvPlugin
     ]
   }
 }

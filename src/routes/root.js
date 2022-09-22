@@ -3,8 +3,10 @@
 module.exports = async function (fastify, opts) {
   const { soa, _ } = fastify
   const passport = await soa.get('passport')
-  fastify.get('/',
-    { preValidation: passport.authenticate('session') },
+  fastify.post('/',
+    {
+      preValidation: passport.authenticate('session')
+    },
     async function (request, reply) {
       const { log } = fastify
       // console.log(fastify._)
