@@ -186,9 +186,12 @@
   - async load(serviceName,SDL) 解析SDL定义，创建及注册serviceName。多次调用只有首次会执行真正的加载任务。
   - async defSrv(serviceName,SDL) 获取内建支持的服务，为方便当前放在pv-fastify包中，未来本接口移除，放入pv-soa包中。
   - async reg(serviceName,{inst,loader}) 内部函数，为soa注册可用服务。
+- util: 工具类名称空间。目前支持如下几个函数。
   - model(base) async 扫描base下的全部js文件，将其当作objection的模型定义加载。
   - schema(base) async 扫描base下的全部json文件，将其当作schema注册进入fastify。
   - route(base) async 扫描base下的全部js文件，将其当作route注册进入fastify。
+  - forwarded [fastify-forwarded](https://github.com/fastify/forwarded)，用于获取request对象中的forward ip队列。
+
 
 # 服务与配置
 
@@ -251,6 +254,13 @@
     - password: 随机创建16位密码， 保存在config/active/postgres/app.passwd中。其中还保存kc.passwd是为keycloak提供的数据库及用户。由于AI不能调整基础环境(基础环境以adapter的方式提供多个)，为灵活起见，不再深度绑定keycloak，而是采用passport。如果需要集成keycloak这样的sso,暴露LDAP接口做为kc的provider来集成。
 - [objection](https://vincit.github.io/objection.js/)。基于knex的ORM。需要自行录入和维护Model.扩展增加了`store`成员以保存系统有效的Model类。
 - [passport](https://www.passportjs.org/): passport登录支持。采用[fastify-passport](https://github.com/fastify/fastify-passport),并内建支持了一些Strategy，可以直接配置使用。
+  - strategies passport的策略配置。
+    - local prodvest实现的local配置。
+      - keep
+  - audit 审计支持，会记录用户每次登录，修改密码的信息。
+    - disabled 禁用审计。默认是false
+    - max 保存的审计记录。默认是0,不限制。
+    - maxTime 最长的审计记录。默认是0，不限制。值为天数。
 - [formbody](https://github.com/fastify/fastify-formbody)，增加对`application/x-www-form-urlencoded`上传格式的支持。
   - conf: [formbody options](https://github.com/fastify/fastify-formbody#options)。如果不配置parser,默认引入qs来支持嵌套parser。
 - [multipart](https://github.com/fastify/fastify-multipart),增加对`formdata/multipart`支持，以支持文件上传。
