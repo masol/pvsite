@@ -256,11 +256,14 @@
 - [passport](https://www.passportjs.org/): passport登录支持。采用[fastify-passport](https://github.com/fastify/fastify-passport),并内建支持了一些Strategy，可以直接配置使用。
   - strategies passport的策略配置。
     - local prodvest实现的local配置。
-      - keep
+      - keep 指定保持登录状态的时长，默认一年。
+      - defaultName 无法获取显示名称时，给出默认的显示名称。
+      - pwdRE 允许用户名密码登录的用户名正则。默认为'.*',全部允许。设置为''禁止用户名密码登录。
+      - loginDev 允许同时登入的设备数。默认是0,不限制。数字表示允许的数量。(暂未支持)
   - audit 审计支持，会记录用户每次登录，修改密码的信息。
     - disabled 禁用审计。默认是false
-    - max 保存的审计记录。默认是0,不限制。
-    - maxTime 最长的审计记录。默认是0，不限制。值为天数。
+    - max 保存的审计记录。默认是0,不限制。(TODO: 放在每日任务中执行)
+    - maxTime 最长的审计记录。默认是0，不限制。值为天数。(TODO: 放在每日任务中执行)
 - [formbody](https://github.com/fastify/fastify-formbody)，增加对`application/x-www-form-urlencoded`上传格式的支持。
   - conf: [formbody options](https://github.com/fastify/fastify-formbody#options)。如果不配置parser,默认引入qs来支持嵌套parser。
 - [multipart](https://github.com/fastify/fastify-multipart),增加对`formdata/multipart`支持，以支持文件上传。
