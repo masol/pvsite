@@ -147,7 +147,6 @@
   - plugins 由fastify定义的目录，启动时会自动加载其中全部插件。(只在主项目中自动遍历，模块中需要手动遍历)
     - prodvest.js 引入pv-fastify。其它内置工作在pv-fastify中完成。
   - routes 由fastify定义的目录，根据文件创建路由。(只在主项目中自动遍历，模块中需要手动遍历)
-  - svelte: svelte的源代码。
   - cmds: 命令实现。
   - test 测试文件存放目录。
 - pvdev 由编辑器维护的数据目录
@@ -157,6 +156,7 @@
   - dps: [数据流处理](https://en.wikipedia.org/wiki/Data_processing)定义,定义数据依赖及处理流。采用[litegraph.js](https://github.com/jagenjo/litegraph.js)——类似[nodered编辑器](https://nodered.org/)
   - acl: 访问控制。采用[casl](https://casl.js.org/v6/en)。
   - openapi: 使用openapi规范定义接口。
+  - pages: 存放pages代码。其中的内容为页面源码(拟定采用[grapesjs编辑器](https://github.com/artf/grapesjs))，采用[post-html](https://github.com/posthtml/posthtml)来做页面迁移。首个迁移目标为svelte，采用[tailwind](https://tailwindcss.com/)。一个站点推荐采用一个项目，而不是设置svelte的config.kit.paths.base配置。默认的编辑器采用此结构。手动处理无限制。
 
 # fastify扩展说明(decorate)
 
@@ -259,7 +259,7 @@
       - keep 指定保持登录状态的时长，默认一年。
       - defaultName 无法获取显示名称时，给出默认的显示名称。
       - pwdRE 允许用户名密码登录的用户名正则。默认为'.*',全部允许。设置为''禁止用户名密码登录。
-      - loginDev 允许同时登入的设备数。默认是0,不限制。数字表示允许的数量。(暂未支持)
+      - loginDev 允许同时登入的设备数。默认是0,不限制。数字表示允许的数量,超出数量按照MLR(暂未支持)
   - audit 审计支持，会记录用户每次登录，修改密码的信息。
     - disabled 禁用审计。默认是false
     - max 保存的审计记录。默认是0,不限制。(TODO: 放在每日任务中执行)
