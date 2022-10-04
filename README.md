@@ -6,6 +6,8 @@
 
 - [使用说明](#使用说明)
 - [命令体系](#命令体系)
+  - [web环境命令](#web环境命令)
+  - [命令行工具](#命令行工具)
 - [主要概念](#主要概念)
   - [相关性](#相关性)
   - [面向服务(SOA)](#面向服务soa)
@@ -38,10 +40,16 @@
 &emsp;&emsp;使用过程中，AI辅助创建和维护代码，对于尚未覆盖或对结构不满意的地方，需要手动修改。因此需要了解创建代码的结构。
 
 # 命令体系
+
+## web环境命令
 &emsp;&emsp;借鉴[drush](https://www.drush.org/latest/)的概念，提供了命令行`npm run cmd XXX -- --param=value`。自动部署未来将取消。目前提供的命令如下:
 - init: 部署并确保数据库schema同步。
 - deploy: 部署运行环境。额外参数: part=XXXX,XXX
 - migrate: 维护数据库，默认全部。额外参数:-- --down --force --all 参考auth模块的文档。
+
+## 命令行工具
+&emsp;&emsp;其它命令行工具，位于tools下，由`npm run tools XXXX`来启动。这里的工具除非特别声明，为跨平台工具，采用shelljs来书写。(但是前期只在linux下测试通过)
+
 
 # 主要概念
 
