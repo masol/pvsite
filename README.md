@@ -14,7 +14,6 @@
     - [服务定义(SDL)](#服务定义sdl)
   - [运行环境](#运行环境)
     - [部署服务](#部署服务)
-    - [规避热部署](#规避热部署)
 - [目录结构](#目录结构)
   - [根目录](#根目录)
 - [fastify扩展说明(decorate)](#fastify扩展说明decorate)
@@ -26,9 +25,9 @@
 
 # 使用说明
 &emsp;&emsp;如果不修改AI创建的代码，不需要开发知识。但是不修改是不可能的。因此，品研从V2开始，假定使用者为程序员。抛弃了V1为领域专家准备的修改UI——如果想支持全部修改，工作量过于浩大了。
-&emsp;&emsp;使用方式，安装npm，docker环境。并提前docker pull下列image:
-- elasticsearch:8.4.1
-- vault:latest
+&emsp;&emsp;使用方式，
+1. 安装[jenkins](https://www.jenkins.io/doc/book/installing/linux/)，不能使用docker环境。我们使用[jenkins pipeline](https://www.jenkins.io/doc/book/pipeline/)来部署环境。
+2. 安装npm，docker环境。
 
 &emsp;&emsp;使用命令`npm create prodvest`来创建自己项目的框架代码。或从品研官网(www.munao.cc)中下载框架代码包。
 &emsp;&emsp;在代码根目录下执行:
@@ -88,17 +87,9 @@
 
 ### 部署服务
 
-&emsp;&emsp;每个运行环境为一个集群，即使本地环境也是一个集群，可以弹性扩充。本地的集群管理使用[consul](https://github.com/hashicorp/consul)。web端使用使用[node-consul](https://github.com/silas/node-consul)来通信。为方便部署，服务部署采用节点的管理与维护采用同一公司的[nomad](https://www.nomadproject.io/)。在服务未启动，但是定义的节点有效时，自动启动。其它集群的管理系统可选采用[Kubernetes系列](https://kubernetes.io/)。这里有如下一个些概念需要区分:
-- 节点: 可以是物理机、容器...
-- 服务(组): 不仅仅包括可部署服务，也包括外部服务。服务在客户端是一个包。
-  - 接口： 使用者可以恒定调用接口。接口采用[gRpc](https://grpc.io/)格式。
-  - 实现： 如果服务提供与接口不同，会提供实现包将其转化为接口。
-- 任务： 这里特指nomad的维护任务。
-- 配置: 配置信息被保存在consul中。
-- secret: secret信息被保存在vault服务中。
-
-### 规避热部署
-&emsp;&emsp;热部署的开销比你想象的高——甚至包括包的自动安装。由于产品环境下，多个节点在执行。为了规避同时发出的部署请求，需要锁系统支持。因此，每次热部署只有一个调用者会执行，其它排队。采用UI会创建冷部署，而不是热部署。手动配置请尽可能不依赖热部署。
+&emsp;&emsp;每个运行环境为一个集群，即使本地环境也是一个集群，可以弹性扩充。集群管理使用[consul](https://github.com/hashicorp/consul)。web端使用使用[node-consul](https://github.com/silas/node-consul)来通信。
+&emsp;&emsp;改进代码结构，在web服务中不再支持热部署。而是将部署功能放入CI/CD工具链中。默认采用[jenkis](https://www.jenkins.io/)来支持devops(全局工程师为同一人)。
+~~为方便部署，服务部署采用节点的管理与维护采用同一公司的[nomad](https://www.nomadproject.io/)。在服务未启动，但是定义的节点有效时，自动启动。其它集群的管理系统可选采用[Kubernetes系列](https://kubernetes.io/)。这里有如下一个些概念需要区分:~~
 
 
 # 目录结构
