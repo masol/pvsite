@@ -7,7 +7,8 @@
 - [使用说明](#使用说明)
 - [命令体系](#命令体系)
   - [web环境命令](#web环境命令)
-  - [命令行工具](#命令行工具)
+    - [web命令说明](#web命令说明)
+  - [pipeline工具](#pipeline工具)
 - [主要概念](#主要概念)
   - [相关性](#相关性)
   - [面向服务(SOA)](#面向服务soa)
@@ -27,9 +28,12 @@
 
 # 使用说明
 &emsp;&emsp;如果不修改AI创建的代码，不需要开发知识。但是不修改是不可能的。因此，品研从V2开始，假定使用者为程序员。抛弃了V1为领域专家准备的修改UI——如果想支持全部修改，工作量过于浩大了。
-&emsp;&emsp;使用方式，
-1. 安装[jenkins](https://www.jenkins.io/doc/book/installing/linux/)，不能使用docker环境。我们使用[jenkins pipeline](https://www.jenkins.io/doc/book/pipeline/)来部署环境。
-2. 安装npm，docker环境。
+&emsp;&emsp;使用方式:
+1. 需要团队级的版本控制，推荐[gitlab](https://docs.gitlab.com/ee/install/docker.html)。一个版本控制可以支持多个项目。不推荐使用[jenkins git](https://plugins.jenkins.io/git-server/)。因为全局工程师需要自行控制jenkins，但可以不自行控制git。也不推荐使用gitlab自带的CI，社区版功能有限。
+2. 安装[jenkins](https://www.jenkins.io/doc/book/installing/linux/)，不能使用docker环境。我们使用[jenkins pipeline](https://www.jenkins.io/doc/book/pipeline/)来部署环境。ubuntu下，按照指引安装jenkins前，需要执行`sudo apt install default-jre`以确保java就绪。使用`systemctl status jenkins.service`来检查jenkins是否就绪。
+   1. 如果需要自定义pipeline,推荐安装[blue ocean插件](https://www.jenkins.io/doc/book/blueocean/getting-started/)。
+   2. 如果需要版本控制，推荐安装
+3. 安装npm，docker环境。
 
 &emsp;&emsp;使用命令`npm create prodvest`来创建自己项目的框架代码。或从品研官网(www.munao.cc)中下载框架代码包。
 &emsp;&emsp;在代码根目录下执行:
@@ -42,13 +46,29 @@
 # 命令体系
 
 ## web环境命令
-&emsp;&emsp;借鉴[drush](https://www.drush.org/latest/)的概念，提供了命令行`npm run cmd XXX -- --param=value`。自动部署未来将取消。目前提供的命令如下:
-- init: 部署并确保数据库schema同步。
+&emsp;&emsp;借鉴[drush](https://www.drush.org/latest/)的概念，提供了命令行`npm run cmd XXX -- --param=value`。命令行模式启用了[external imports](https://nodejs.org/api/esm.html#https-and-http-imports)。允许从网络加载代码。目前提供的命令如下:
+- user: 自动调用migrate之后，维护用户，支持如下参数:
+  - --init 创建admin用户，如果没有的话。这是默认选项。
+  - --passwd 修改admin用户密码.值为给定的值。
+- pkg: 使用[pkg](https://github.com/vercel/pkg)生成编译发行版。
 - deploy: 部署运行环境。额外参数: part=XXXX,XXX
 - migrate: 维护数据库，默认全部。额外参数:-- --down --force --all 参考auth模块的文档。
 
-## 命令行工具
-&emsp;&emsp;其它命令行工具，位于tools下，由`npm run tools XXXX`来启动。这里的工具除非特别声明，为跨平台工具，采用shelljs来书写。(但是前期只在linux下测试通过)
+### web命令说明
+&emsp;&emsp;通过检查`fastify.runcmd`是否为真来判定是否处于命令模式下。命令模式有如下几个特点:
+- 加载配置与服务的过程与web模式相同。
+- 启用本地sock监听而不是网络监听，这是因为[fastify-cli](https://github.com/fastify/fastify-cli/blob/master/start.js#L156)目前无法设置`additionalOptions`。这导致命令无法并行。
+
+## pipeline工具
+&emsp;&emsp;由于全局工程师的概念范围广，需要多个传统工具，为简化初学者的工具操作数量，提供了pipeline工具。以取代传统三个devOps工具:
+- Pipeline中支持[Infrastructure automation](https://www.redhat.com/en/topics/automation/what-is-infrastructure-automation#:~:text=Infrastructure%20automation%20is%20the%20use,information%20technology%20services%20and%20solutions.)，可以使用诸如[pulumi](https://www.pulumi.com/)等工具来替换。
+- CI/CD可以方便的集成进入诸如[jenkis](https://www.jenkins.io/)的pipeline。
+- [infrastructure monitoring](https://sematext.com/blog/infrastructure-monitoring-tools/)工具只提供了部分测试脚本。可以通过自行安装[Graphite](https://graphite.readthedocs.io/en/stable/)或购买国内的监视服务来支持。
+
+
+&emsp;&emsp;这些命令位于pipeline目录下，由`npm run pipeline XXXX`或者`gulp XXX`来启动。内部脚本使用gulp任务管理器来实现。为跨平台工具，采用shelljs来书写(但是前期只在linux下测试通过)。支持如下stage:
+- chkInfra 检查Infra环境是否就绪。
+- deployInfra 配置Infrastructure。
 
 
 # 主要概念
