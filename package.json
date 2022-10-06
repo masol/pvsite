@@ -32,7 +32,6 @@
     "@fastify/sensible": "^5.0.0",
     "@fastify/session": "^9.0.0",
     "@fastify/static": "^6.5.0",
-    "@keycloak/keycloak-admin-client": "^19.0.2",
     "@socket.io/redis-adapter": "^7.2.0",
     "ajv-formats": "^2.1.1",
     "ajv-merge-patch": "^5.0.1",
@@ -42,7 +41,6 @@
     "fastify": "4.5.3",
     "fastify-cli": "^5.3.0",
     "fastify-https-redirect": "^1.0.4",
-    "fastify-keycloak-adapter": "^1.6.0",
     "fastify-multer": "^2.0.3",
     "fastify-plugin": "^4.2.1",
     "ioredis": "^5.2.3",
@@ -55,15 +53,12 @@
     "redis": "^4.3.0"
   },
   "devDependencies": {
-    "chalk": "^5.1.0",
     "eslint": "^8.0.1",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-n": "^15.0.0",
     "eslint-plugin-promise": "^6.0.0",
-    "fancy-log": "^2.0.0",
     "gulp": "^4.0.2",
-    "gulp-changed": "^4.0.3",
     "tap": "^16.1.0",
     "yargs": "^17.6.0"
   },

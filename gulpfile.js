@@ -9,12 +9,7 @@
 // Created On : 6 Oct 2022 By 李竺唐 of SanPolo.Co.LTD
 // File: index
 
-const { series, task } = require('gulp')
-
-const Names = {
-  status: '状态获取',
-  report: '报告'
-}
+const gulpInst = require('gulp')
 
 const args = require('yargs')
   .alias('t', 'target')
@@ -26,27 +21,12 @@ const args = require('yargs')
   .argv
 
 const path = require('path')
-process.env.NODE_CONFIG_DIR = process.env.NODE_CONFIG_DIR || path.join(__dirname, '..', 'config', args.target)
+process.env.NODE_CONFIG_DIR = process.env.NODE_CONFIG_DIR || path.join(__dirname, 'config', args.target)
 const config = require('config')
 
 const opts = {
   config,
-  args
+  gulpInst
 }
 
-task(Names.status, require('./status')(opts))
-task(Names.report, require('./report')(opts))
-
-const status = series(Names.status, Names.report)
-/**
- * pipeline说明:
- * 编译: build - deploy - test
- * 监测: status
- * 部署: infras(only run if status not ok,except --force given) - deploy
- */
-const tasks = {
-  default: status,
-  status
-}
-
-module.exports = tasks
+module.exports = require('@masol/pipeline')(opts)
