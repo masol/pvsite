@@ -55,12 +55,17 @@
     "redis": "^4.3.0"
   },
   "devDependencies": {
+    "chalk": "^5.1.0",
     "eslint": "^8.0.1",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-n": "^15.0.0",
     "eslint-plugin-promise": "^6.0.0",
-    "tap": "^16.1.0"
+    "fancy-log": "^2.0.0",
+    "gulp": "^4.0.2",
+    "gulp-changed": "^4.0.3",
+    "tap": "^16.1.0",
+    "yargs": "^17.6.0"
   },
   "repository": "https://gitlab.wware.org/pub/pvsite.git"
 }
