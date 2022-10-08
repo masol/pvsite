@@ -3,7 +3,7 @@
 const fs = require('fs')
 const path = require('path')
 const AutoLoad = require('@fastify/autoload')
-const SOA = require('pv-soa')
+const SOA = require('@masol/soa')
 const fp = require('fastify-plugin')
 
 process.env.NODE_CONFIG_DIR = process.env.NODE_CONFIG_DIR || path.join(__dirname, 'config', 'active')

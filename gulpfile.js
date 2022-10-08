@@ -10,6 +10,7 @@
 // File: index
 
 const gulpInst = require('gulp')
+const soa = require('@masol/soa')
 
 const args = require('yargs')
   .alias('t', 'target')
@@ -25,8 +26,11 @@ process.env.NODE_CONFIG_DIR = process.env.NODE_CONFIG_DIR || path.join(__dirname
 const config = require('config')
 
 const opts = {
+  args,
   config,
-  gulpInst
+  gulpInst,
+  ctx: {},
+  soa: soa.getUtil(config)
 }
 
 module.exports = require('@masol/pipeline')(opts)

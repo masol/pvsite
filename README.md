@@ -180,8 +180,12 @@
   - cmds: 命令实现。
   - test 测试文件存放目录。
 - pvdev 由编辑器维护的数据目录
-  - tools: 提供一些常用批处理命令。
   - schemas: 保存系统定义的业务级变量schma.
+  - nodes: 定义了运行节点。子目录与config中的子目录相同。定义了目标集群的环境。其中dev为本地环境。详细信息参阅@masol/pipeline项目中的说明。
+    - dev: 这是本地环境，如果未给出，采用默认定义。
+      - node.json 定义了全部节点，并给出了登录方式。可索引secret中的文件。
+      - secret 存放node.json中索引的证书等文件。
+      - service.json 定义了全部服务，其中会索引node.json中定义的节点。
   - fsms: 引用业务级变量的有限状态机，事件(transition)通常为人类动作。采用[xstate](https://xstate.js.org/)。
   - dps: [数据流处理](https://en.wikipedia.org/wiki/Data_processing)定义,定义数据依赖及处理流。采用[litegraph.js](https://github.com/jagenjo/litegraph.js)——类似[nodered编辑器](https://nodered.org/)
   - acl: 访问控制。采用[casl](https://casl.js.org/v6/en)。
