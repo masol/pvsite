@@ -126,9 +126,12 @@
 
 ### 部署服务
 
-&emsp;&emsp;每个运行环境为一个集群，即使本地环境也是一个集群，可以弹性扩充。集群管理使用[consul](https://github.com/hashicorp/consul)。web端使用使用[node-consul](https://github.com/silas/node-consul)来通信。
-&emsp;&emsp;改进代码结构，在web服务中不再支持热部署。而是将部署功能放入CI/CD工具链中。默认采用[jenkis](https://www.jenkins.io/)来支持devops(全局工程师为同一人)。
-~~为方便部署，服务部署采用节点的管理与维护采用同一公司的[nomad](https://www.nomadproject.io/)。在服务未启动，但是定义的节点有效时，自动启动。其它集群的管理系统可选采用[Kubernetes系列](https://kubernetes.io/)。这里有如下一个些概念需要区分:~~
+&emsp;&emsp;每个运行环境为一个集群，即使本地环境也是一个集群，可以弹性扩充。提供了基于[gulp](https://gulpjs.com/)的pipeline子项目来支持devops(全局工程师为同一人)。提供如下支持:
+- 对于微型集群(服务器数量小于等于5)，无需任何定义，由pipeline自动处理。
+- 对于小型集群(服务器数量小于等于200),需自行为节点分配服务，其余交由pipeline自动处理。
+- 超出200台服务器的集群，请采用其它ItOps工具链。例如[jenkis](https://www.jenkins.io/)+[salt](https://saltproject.io/)
+&emsp;&emsp;默认的Web服务，采用前后端分离策略。静态资源可以部署在oss中，并采用cdn加速。非入口(用户在浏览器直接输入)URL，为immutable assets。可以安全的设置为用不变化。api资源需部署于可计算环境下。
+&emsp;&emsp;pipeline支持的部署，本地环境采用docker部署依赖服务，$webXXX服务被忽略。其它节点采用[masterless salt](https://docs.saltproject.io/en/latest/topics/tutorials/quickstart.html)。pipeline的使用细节，参考pipeline项目。
 
 
 # 目录结构
@@ -137,7 +140,7 @@
 
 ## 根目录
 
-- config 由pv-fastify定义的目录，不会加入到git中，存放服务定义。每个子目录为一个运行环境。应用配置由[node-config](https://github.com/node-config/node-config)来处理，请参考其文档了解支持的格式及使用方式。
+- config 由pv-fastify定义的目录，***不应***加入到git中，存放**针对集群环境编译后的**服务定义，对应人工维护的原文件位于pvdev/nodes目录中。每个子目录为一个运行环境。应用配置由[node-config](https://github.com/node-config/node-config)来处理，请参考其文档了解支持的格式及使用方式。
   - :sweat_drops: envs.json 一个数组，定义了全部运行环境，方便admin快速处理，无需从目录中重构。local为本地。
   - active 符号链接，链接到当前有效的运行环境。
   - dev 开发运行环境：应用，数据库等配置信息。(下方目录都是默认值，如果更改配置文件，下方内容可能失效)
@@ -160,7 +163,6 @@
         - data: elastic的数据。
         - logs: elastic的日志。
     - vault vault的本地目录.
-      - ~~docker-compose.yml 启动vault service的docker compose配置,已废弃.~~
       - root.key 如果自动初始化,则这里保存了root key.用于vault解封.
       - root.token 如果自动初始化,保存了root token.用于后续免登录访问vault.
       - volumes: 映射到docker容器的host目录.
