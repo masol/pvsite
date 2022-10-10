@@ -3,6 +3,8 @@ config
 #root
 root
 
+src/helper/root
+
 # Logs
 logs
 *.log

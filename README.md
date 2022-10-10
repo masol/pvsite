@@ -175,12 +175,12 @@
     - models objection.js所维护的模型。
     - schemas 用于fastify验证的schema保存在这里。
     - assets: 静态资源源代码，会整个的拷贝到root目录下。根据后缀选择资源处理方式。
-    - root 静态资源web入口。不要直接向这里写入内容，这是编译之后存放客户端静态资源的地方。不保存在git中。这里也是sveltekit build的结果存放地。
+    - root 静态资源web入口。不要直接向这里写入内容，这是编译之后存放客户端静态资源的地方。不保存在git中。
   - plugins 由fastify定义的目录，启动时会自动加载其中全部插件。(只在主项目中自动遍历，模块中需要手动遍历)
     - prodvest.js 引入pv-fastify。其它内置工作在pv-fastify中完成。
-  - routes 由fastify定义的目录，根据文件创建路由。(只在主项目中自动遍历，模块中需要手动遍历)
+  - routes 由fastify定义的目录，根据文件创建路由。(只在主项目中自动遍历，模块中需要手动遍历——可调用soa.util.route自动加入路由)
   - cmds: 命令实现。
-  - test 测试文件存放目录。
+- test 测试文件存放目录。
 - pvdev 由编辑器维护的数据目录
   - schemas: 保存系统定义的业务级变量schma.
   - nodes: 定义了运行节点。子目录与config中的子目录相同。定义了目标集群的环境。其中dev为本地环境。详细信息参阅@masol/pipeline项目中的说明。
