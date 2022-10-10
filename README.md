@@ -251,18 +251,13 @@
     - locale: [string] 默认locale(`zh-CN`).在validator时用到。
     - pkg: [string] 采用的包管理器。默认为yarn,可以设置为npm或pnpm。
     - index: [string] 采用的全文索引库，设置为false以禁用全文检索。默认为elastic
-    - db: [string] 采用的database,设置为false以禁用database support。默认为knex(默认sqlite,远程需要外部配置)
+    - db: [string] 采用的database,设置为false以禁用database support。默认为knex(默认postgresql,远程需要外部配置)
     - share: [string] 采用的快速ipc共享(通常也被用做缓冲),设置为false以禁用ipc。默认为redis。
     - fs: [string] 采用的文件存储，设置为false以禁用文件存储。默认为local。
     - vault: [string] 采用的安全存储服务，设置为false以禁用安全存储。默认为false，可选vault。
     - sso: [string] 采用的单点登录服务(Single-Sign-On)。可选keycloak,casdoor,authelia,zitadel。默认为passort。虽然passport不是一个sso server，但可以实现并模拟出sso效果。
     - bidco: [string] 采用的双向通信(bidirectional communication)。默认为false。可以设置为[socketio](https://socket.io/)。默认使用redis adapter。
     - static: [string] 静态资源存储服务，设置为false以禁用静态资源服务。默认为local。
-    - pipeline: [string] 任务流管理器，默认为false。可选外部工作流管理服务:kafka,airflow
-    - deploy: [string|object|boolean] 本地环境下，此配置被忽略，强制采用docker模式。指定部署方式,如果设置为false,则禁止自动部署。按照部署方式将其分为如下三类:
-      - native mode: 在指定机器上安装软件，不依赖docker部署。ansible、salt、puppet都属于此类。这种方式无论单机还是大规模集群都可以，包括docker in container mode.
-      - single machine docker mode: 单机或者少量机器，只采用docker来简化环境依赖。不采用容器管理服务。本地环境默认为此模式。值为docker。
-      - cluster docker mode: 集群模式，采用专门的容器管理服务来配置，可用值为kubernetes、nomad
 - cors: 定义了cors设置。返回插件对象。
   - conf: 参考[cors-options](https://github.com/fastify/fastify-cors#options)
 - circuit-breaker: 返回插件对象。
