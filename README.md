@@ -253,7 +253,7 @@
     - index: [string] 采用的全文索引库，设置为false以禁用全文检索。默认为elastic
     - db: [string] 采用的database,设置为false以禁用database support。默认为knex(默认postgresql,远程需要外部配置)
     - share: [string] 采用的快速ipc共享(通常也被用做缓冲),设置为false以禁用ipc。默认为redis。
-    - oss: [string] 采用的文件存储，设置为false以禁用文件存储。默认为s3(s3兼容对象存储)。
+    - oss: [string] 采用的对象存储，默认为'local'(对象保存于config/active/oss/data中)。可设置为s3(s3兼容对象存储)。如果节点定义中未定义oss节点，那么采用local(static插件)方式。设置为s3,则webass与webapi分别为独立服务。本地部署s3兼容服务器，推荐[zenko](https://www.zenko.io/)或[localstack](https://github.com/localstack/localstack)。
     - vault: [string] 采用的敏感信息存储服务，默认为false(密码信息保存在config目录下的文件系统中)，可选vault。
     - sso: [string] 采用的单点登录服务(Single-Sign-On)。可选keycloak,casdoor,authelia,zitadel。默认为passort。虽然passport不是一个sso server，但可以实现并模拟出sso效果。
     - bidco: [string] 采用的双向通信(bidirectional communication)。默认为false。可以设置为[socketio](https://socket.io/)。默认使用redis adapter。
