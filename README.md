@@ -253,7 +253,7 @@
     - index: [string] 采用的全文索引库，设置为false以禁用全文检索。默认为elastic
     - db: [string] 采用的database,设置为false以禁用database support。默认为knex(默认postgresql,远程需要外部配置)
     - share: [string] 采用的快速ipc共享(通常也被用做缓冲),设置为false以禁用ipc。默认为redis。
-    - oss: [string] 采用的对象存储，默认为'local'(对象保存于config/active/oss/data中)。可设置为s3(s3兼容对象存储)。如果节点定义中未定义oss节点，那么采用local(static插件)方式。设置为s3,则webass与webapi分别为独立服务。本地部署s3兼容服务器，推荐[zenko](https://www.zenko.io/)或[localstack](https://github.com/localstack/localstack)。
+    - oss: [string] 采用的对象存储，默认为'oss'。设置为local禁用之。webass与webapi分别为独立服务。本地部署的s3兼容服务器采用[zenko](https://www.zenko.io/)。如果使用[localstack](https://github.com/localstack/localstack)，需自行配置pipeline。
     - vault: [string] 采用的敏感信息存储服务，默认为false(密码信息保存在config目录下的文件系统中)，可选vault。
     - sso: [string] 采用的单点登录服务(Single-Sign-On)。可选keycloak,casdoor,authelia,zitadel。默认为passort。虽然passport不是一个sso server，但可以实现并模拟出sso效果。
     - bidco: [string] 采用的双向通信(bidirectional communication)。默认为false。可以设置为[socketio](https://socket.io/)。默认使用redis adapter。
@@ -295,6 +295,18 @@
     - disabled 禁用审计。默认是false
     - max 保存的审计记录。默认是0,不限制。(TODO: 放在每日任务中执行)
     - maxTime 最长的审计记录。默认是0，不限制。值为天数。(TODO: 放在每日任务中执行)
+- oss: 对象存储服务。
+  - package: 默认为`aws-sdk`,表示采用s3兼容的oss。
+  - conf 保存了aws-s3的`AWS.config.update`参数.
+    - accessKeyId: 默认为cloudserver在`/usr/src/app/conf/authdata.json`配置的`lifecycleKey1`
+    - secretAccessKey: 其对应的`lifecycleSecretKey1`。
+    - endpoint: 默认为`localhost:8000`
+    - region: 默认为cloudserver在`/usr/src/app/locationConfig.json`配置的`us-east-1`
+    - sslEnabled: 默认为false，如果需要启用ssl,需要在nodes/services.json中设置启用后，这里才可以修改为true。
+    - s3ForcePathStyle: 默认为true，可以通过访问时添加host来将某个bucket设置为webroot。
+  - bucket: 初始的bucket信息。其值为[createBucket](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#createBucket-property)的参数。
+    - Bucket: 默认default。
+    - ACL: 默认为'public-read'。
 - [formbody](https://github.com/fastify/fastify-formbody)，增加对`application/x-www-form-urlencoded`上传格式的支持。
   - conf: [formbody options](https://github.com/fastify/fastify-formbody#options)。如果不配置parser,默认引入qs来支持嵌套parser。
 - [multipart](https://github.com/fastify/fastify-multipart),增加对`formdata/multipart`支持，以支持文件上传。
