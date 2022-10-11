@@ -110,17 +110,16 @@
 &emsp;&emsp;定义体系结构，就是定义服务组合。设计一个应用，首先定义其服务组合。可以将config目录下的服务定义看作体系结构定义。注意这里的服务与[micro-service](https://en.wikipedia.org/wiki/Microservices)有区别。自行查阅代码了解。
 
 ### 服务定义(SDL)
-&emsp;&emsp;一个服务定义文件，可以定义多个服务。key为服务名称，值定义如下(这通常是由一个子AI设计并配置的，只有在不满意结果时，才需要人工修改):
+&emsp;&emsp;一个服务定义文件，可以定义多个服务。key为服务名称，值定义如下(这通常是由一个子AI设计并配置的，只有在不满意结果时，才需要人工修改)。通过`soa.get('SRV')`获取到的服务，可以检查其`issue`来确定其实现方式。
 - name:string&emsp;服务名称,可选。
 - disable: boolean&emsp; 是否此服务被禁用，默认false.
 - conf:object&emsp; 实例时的配置.
 - loader:object|string&emsp; 装载器配置。类似url,protocal部分为type,例如:`yarn://packagename#local-parameters`。默认的http/https假定装载的是一个es6 module.
   - type: 装载器类型:es6|npm|yarn
-- deploy?:&emsp; 部署器配置。
 
 ## 运行环境
 
-&emsp;&emsp;通过web界面，在本地环境时，提供了维护运行环境的能力。运行环境通过在config目录下建立符号链接active来支持。有效的运行环境在config/runtime.json中定义。这一设定是考虑由web ui来维护运行环境。在config/{mode}/opts.json中添加对应的[fastify启动配置]([https://www.fastify.io/docs/latest/Reference/Server/)
+&emsp;&emsp;通过pipeline，在本地环境时，提供了维护运行环境的能力。运行环境通过在`pvdev/nodes`目录中定义，并编译到config目录下，特定环境通过建立符号链接active来支持。在`pvdev/nodes/{cluster name}/config/default.json`中添加对应的[fastify启动配置]([https://www.fastify.io/docs/latest/Reference/Server/)。pipeline会将其更新至`config/{cluster name}/default.json`
 
 **😄 注意，默认配置，config目录不会保存到git中。这里有可能保存了key,cert等敏感文件。**
 
@@ -243,18 +242,19 @@
 - fastify: 返回fastify对象。
   - conf: 保存[fastify启动配置](https://www.fastify.io/docs/latest/Reference/Server/#factory)。如果配置了http2或者空的https。则在config/active/fastify下加载https.crt或https.key。tools中提供了openssl的自签名命令行。http跳转一是借助DNS，二是借助[fastify-https-redirect](https://github.com/tomsvogel/fastify-https-redirect)。推荐使用DNS。
     - logger: logger的可配置项，参考[pino配置对象](https://github.com/pinojs/pino/blob/master/docs/api.md#options-object)。pv-fastify允许logger值为字符串，此时其指向了logger对象定义模块,空为'./logger.js',pino的log系列方法的message格式，采用%s,%d,%o占位方式，[参考其文档](https://github.com/pinojs/pino/blob/master/docs/api.md#message)。
-- env: 定义了运行环境。返回env对象。
+- env: 定义了运行环境信息。返回env对象。
   - conf
     - name: [string] 运行环境人读名称。
     - mname: [string] 运行环境机读名称——此名称也是保存配置的目录名称。
     - dev: [boolean] 是否是开发环境，以决定是否加载开发模块，有安全隐患，请不要在正式环境下设置此值。
     - locale: [string] 默认locale(`zh-CN`).在validator时用到。
-    - pkg: [string] 采用的包管理器。默认为yarn,可以设置为npm或pnpm。
+
+    下面设置的服务，会在启动时加载。可以取代disable/enable配置方式，更集中。注意:enable/disable优先级高于这里的配置。
     - index: [string] 采用的全文索引库，设置为false以禁用全文检索。默认为elastic
     - db: [string] 采用的database,设置为false以禁用database support。默认为knex(默认postgresql,远程需要外部配置)
     - share: [string] 采用的快速ipc共享(通常也被用做缓冲),设置为false以禁用ipc。默认为redis。
-    - fs: [string] 采用的文件存储，设置为false以禁用文件存储。默认为local。
-    - vault: [string] 采用的安全存储服务，设置为false以禁用安全存储。默认为false，可选vault。
+    - oss: [string] 采用的文件存储，设置为false以禁用文件存储。默认为s3(s3兼容对象存储)。
+    - vault: [string] 采用的敏感信息存储服务，默认为false(密码信息保存在config目录下的文件系统中)，可选vault。
     - sso: [string] 采用的单点登录服务(Single-Sign-On)。可选keycloak,casdoor,authelia,zitadel。默认为passort。虽然passport不是一个sso server，但可以实现并模拟出sso效果。
     - bidco: [string] 采用的双向通信(bidirectional communication)。默认为false。可以设置为[socketio](https://socket.io/)。默认使用redis adapter。
     - static: [string] 静态资源存储服务，设置为false以禁用静态资源服务。默认为local。
@@ -324,6 +324,7 @@
 - docker-modem:
   - conf: 参考[使用docker-modem](https://github.com/apocas/docker-modem#getting-started)
 - vault :
+  - issue: HashiCorp || 'local' : 默认为local,local当前只支持read方法，根据名称，从对应文件系统中获取。
   - conf: [node-vault配置项](https://github.com/nodevault/node-vault#init-and-unseal)。
 - [zinc](https://zincsearch.com/): 使用zinsearch执行全文检索。
 - keycloak： [keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)提供了keycloak,我们将keycloak-adapter实现为服务，默认热部署[bitnami/keycloak](https://hub.docker.com/r/bitnami/keycloak)。部署时采用pg中的keycloak数据库，数据库密码保存在postgres/kc.passwd。kc的超级用户(admin)密码保存在keycloak/admin.passwd;管理员(manage)密码保存在keycloak/manage.passwd中。默认创建app realm。keycloak返回的是[KcAdminClient](https://github.com/keycloak/keycloak-nodejs-admin-client)实例对象，已通过验证。并且[fastify-keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)已设置好。preValidation已监听。

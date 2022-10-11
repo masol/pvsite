@@ -13,9 +13,8 @@
     "dev": "fastify start -w --ignoreWatch=\"config pvdev src/frontend\" -l debug -P -o app.js"
   },
   "keywords": [],
-  "private": true,
   "author": "lizhutang <lizhutang@spolo.org>",
-  "license": "WWARE",
+  "license": "APACHE2",
   "dependencies": {
     "@elastic/elasticsearch": "^8.4.0",
     "@fastify/accepts": "^4.0.1",
