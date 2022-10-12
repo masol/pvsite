@@ -3,6 +3,9 @@ config
 #root
 root
 
+pvdev/nodes/*/secret
+pvdev/nodes/*/.vagrant
+
 src/helper/root
 
 # Logs
