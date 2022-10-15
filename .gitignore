@@ -3,8 +3,8 @@ config
 #root
 root
 
-pvdev/nodes/*/secret
-pvdev/nodes/*/.vagrant
+pvdev/cluster/*/secret
+pvdev/cluster/*/.vagrant
 
 src/helper/root
 
