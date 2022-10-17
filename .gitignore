@@ -2,6 +2,7 @@
 config
 #root
 root
+.pipeline
 
 pvdev/cluster/*/secret
 pvdev/cluster/*/.vagrant
