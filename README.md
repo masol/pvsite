@@ -181,6 +181,7 @@
   - cmds: 命令实现。
 - test 测试文件存放目录。
 - pvdev 由编辑器维护的数据目录
+  - project.json 定义了项目的基础信息。其中$webapi的目录是当前项目目录，$webass指定了静态资源目录(如未指定，则为当前目录加ui构成目录,和当前目录同级)。
   - schemas: 保存系统定义的业务级变量schma.
   - nodes: 定义了运行节点。子目录与config中的子目录相同。定义了目标集群的环境。其中dev为本地环境。详细信息参阅@masol/pipeline项目中的说明。
     - dev: 这是本地环境，如果未给出，采用默认定义。
@@ -240,6 +241,7 @@
 ### 默认启用
 
 - fastify: 返回fastify对象。
+  - domain: 保存了允许的domain名称，多个以空格分割。只有请求指定的domain,才会得到响应。否则会抛出bad request异常。
   - conf: 保存[fastify启动配置](https://www.fastify.io/docs/latest/Reference/Server/#factory)。如果配置了http2或者空的https。则在config/active/fastify下加载https.crt或https.key。tools中提供了openssl的自签名命令行。http跳转一是借助DNS，二是借助[fastify-https-redirect](https://github.com/tomsvogel/fastify-https-redirect)。推荐使用DNS。
     - logger: logger的可配置项，参考[pino配置对象](https://github.com/pinojs/pino/blob/master/docs/api.md#options-object)。pv-fastify允许logger值为字符串，此时其指向了logger对象定义模块,空为'./logger.js',pino的log系列方法的message格式，采用%s,%d,%o占位方式，[参考其文档](https://github.com/pinojs/pino/blob/master/docs/api.md#message)。
 - env: 定义了运行环境信息。返回env对象。
@@ -258,6 +260,8 @@
     - sso: [string] 采用的单点登录服务(Single-Sign-On)。可选keycloak,casdoor,authelia,zitadel。默认为passort。虽然passport不是一个sso server，但可以实现并模拟出sso效果。
     - bidco: [string] 采用的双向通信(bidirectional communication)。默认为false。可以设置为[socketio](https://socket.io/)。默认使用redis adapter。
     - static: [string] 静态资源存储服务，设置为false以禁用静态资源服务。默认为local。
+- helmet: 定义了[fastify-helmet](https://github.com/fastify/fastify-helmet)的配置。
+  - conf: 定义了helment的配置项。默认内容参考[helmetjs](https://helmetjs.github.io/)
 - cors: 定义了cors设置。返回插件对象。
   - conf: 参考[cors-options](https://github.com/fastify/fastify-cors#options)
 - circuit-breaker: 返回插件对象。

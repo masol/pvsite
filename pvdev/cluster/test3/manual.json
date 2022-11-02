@@ -3,18 +3,21 @@
     "type": "ssh",
     "host": "192.168.56.101",
     "username": "root",
-    "password":"test12345678"
+    "password":"test12345678",
+    "services":["elastic","postgres"]
   },
   "node2":{
     "type": "ssh",
     "host": "192.168.56.102",
     "username": "root",
-    "password":"test12345678"
+    "password":"test12345678",
+    "services":["redis"]
   },
   "node3":{
     "type": "ssh",
     "host": "192.168.56.103",
     "username": "root",
-    "password":"test12345678"
+    "password":"test12345678",
+    "services":["$webapi"]
   }
 }
