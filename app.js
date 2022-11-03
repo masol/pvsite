@@ -38,34 +38,8 @@ if (!fastiConf.ajv) {
 }
 
 module.exports = fp(async function (fastify, opts) {
-  if (opts.cmd) {
-    // 由于fastify-cli无法设置additionalOptions，改为监听random socks.see: https://github.com/fastify/fastify-cli/blob/c694d12aa14d53bad93da5541ff281e79e9f337f/start.js#L152
-    fastiConf.address = undefined
-    fastify.decorate('runcmd', opts)
-
-    // 命令模式，添加onReady hook,并等到opts的deps结束。
-    fastify.addHook('onReady', async function () {
-      setTimeout(async () => {
-        const deps = opts.deps || []
-        await Promise.all(deps)
-        await fastify.$.delay(100)
-        let exitCode = 0
-        await fastify.close().catch(e => {
-          console.log('退出命令模式时发生错误:', e)
-          exitCode = 1
-        })
-        process.exit(exitCode)
-      }, 1000)
-    })
-  }
   // Place here your custom code!
 
-  // const SystemJS = require('systemjs')
-  // console.log('SystemJS=', SystemJS.System)
-  // const test = await import('https://www.prodvest.com/localibs/pvschema.m.js').catch(e => {
-  //   console.log('import from net error:', e)
-  // })
-  // console.log('test module=', test)
   // 在将shell移至库函数后，需要在主项目中import/require。这是一个临时解决方案。
   fastify.decorate('require', (pkgName) => {
     return require(pkgName)

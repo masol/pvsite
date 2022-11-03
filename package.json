@@ -9,7 +9,7 @@
   "scripts": {
     "test": "tap \"test/**/*.test.js\"",
     "start": "fastify start -l info -o app.js",
-    "cmd": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-network-imports\" fastify start -T 0 -s cmd.sock -l info -P -o app.js -- --cmd",
+    "cmd": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-network-imports\" node start.js --cmd",
     "dev": "fastify start -w --ignoreWatch=\"config pvdev src/frontend\" -l debug -P -o app.js"
   },
   "keywords": [],
@@ -33,8 +33,8 @@
     "@fastify/session": "^9.0.0",
     "@fastify/static": "^6.5.0",
     "@masol/auth": "^0.0.1",
-    "@masol/soa": "^0.0.2",
     "@masol/pipeline": "^0.0.2",
+    "@masol/soa": "^0.0.2",
     "@socket.io/redis-adapter": "^7.2.0",
     "ajv-formats": "^2.1.1",
     "ajv-merge-patch": "^5.0.1",

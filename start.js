@@ -46,32 +46,28 @@ function filterArgs (args) {
   return ret
 }
 
-function start () {
-// Read the .env file.
-  require('dotenv').config()
+async function runCmd (app, args) {
+  // 由于fastify-cli无法设置additionalOptions，改为监听random socks.see: https://github.com/fastify/fastify-cli/blob/c694d12aa14d53bad93da5541ff281e79e9f337f/start.js#L152
+  app.decorate('runcmd', args)
 
-  const args = parseArg()
-  console.log('args=', args)
+  app.ready()
 
-  // Require the framework
-  const Fastify = require('fastify')
+  // 命令模式，添加onReady hook,并等到opts的deps结束。
+  // app.addHook('onReady', async function () {
+  // console.log('on ready!')
+  setTimeout(async () => {
+    const deps = args.deps || []
+    // console.log('deps=', deps)
+    await Promise.all(deps)
+    await app.$.delay(100)
+    process.exit(0)
+  }, 1000)
+  // })
+}
 
+function start (app, args, opts) {
   // Require library to exit fastify process, gracefully (if possible)
   const closeWithGrace = require('close-with-grace')
-
-  // Register your application as a normal plugin.
-  const appService = require('./app.js')
-
-  const opts = Object.assign({}, appService.options)
-  Object.assign(opts, filterArgs(args))
-  console.log('fastify opts=', opts)
-  if (typeof opts.logger === 'undefined') {
-    opts.logger = true
-  }
-  // Instantiate Fastify with some config
-  const app = Fastify(opts)
-
-  app.register(appService, args)
 
   // delay is the number of milliseconds for the graceful close to finish
   const closeListeners = closeWithGrace({ delay: process.env.FASTIFY_CLOSE_GRACE_DELAY || 500 }, async function ({ signal, err, manual }) {
@@ -121,4 +117,41 @@ function start () {
   }
 }
 
-start()
+(async () => {
+  // Read the .env file.
+  require('dotenv').config()
+
+  const args = parseArg()
+  // console.log('args=', args)
+
+  // Require the framework
+  const Fastify = require('fastify')
+
+  // Register your application as a normal plugin.
+  const appService = require('./app.js')
+
+  const opts = Object.assign({}, appService.options)
+  Object.assign(opts, filterArgs(args))
+  // console.log('fastify opts=', opts)
+  if (typeof opts.logger === 'undefined') {
+    if (args.cmd) {
+      opts.logger = {
+        transport: {
+          target: 'pino-pretty'
+        }
+      }
+    } else {
+      opts.logger = true
+    }
+  }
+  // Instantiate Fastify with some config
+  const app = Fastify(opts)
+
+  app.register(appService, args)
+
+  if (args.cmd) {
+    await runCmd(app, args)
+  } else {
+    start(app, args, opts)
+  }
+})()
