@@ -17,6 +17,7 @@ function parseArg () {
     .alias('p', 'port')
     .alias('c', 'cluster')
     .boolean('cluster')
+    .boolean('verbose')
     .default('cluster', false)
     // 不能设置默认值，因为这里的优先级高于module options.
     // .boolean('options')
@@ -66,6 +67,8 @@ async function runCmd (app, args) {
 }
 
 function start (app, args, opts) {
+  console.log('NODE_APP_INSTANCE=', process.env.NODE_APP_INSTANCE)
+
   // Require library to exit fastify process, gracefully (if possible)
   const closeWithGrace = require('close-with-grace')
 
@@ -86,6 +89,11 @@ function start (app, args, opts) {
   const cluster = require('cluster')
   if (args.cluster && cluster.isMaster) { // cluster模式
     doListen = false
+    const intId = setInterval(() => {
+      if (Object.keys(cluster.workers).length > 0) {
+        clearInterval(intId)
+      }
+    }, 100)
     cluster.on('exit', function (worker) {
       console.log('Worker', worker.id, ' has exited.')
     })
@@ -93,7 +101,7 @@ function start (app, args, opts) {
   // Start listening.
   if (doListen) {
     const isHttps = (opts.http2 || opts.https)
-    if (!isHttps) { // 不是https时，80转发到443.
+    if (isHttps) { // 是https时，80转发到443.
       const http = require('http')
       http.createServer(function (req, res) {
         res.writeHead(301, { Location: 'https://' + req.headers.host + req.url })
