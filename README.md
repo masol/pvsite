@@ -20,6 +20,7 @@
     - [服务定义(SDL)](#服务定义sdl)
   - [运行环境](#运行环境)
     - [部署服务](#部署服务)
+  - [缓冲说明](#缓冲说明)
 - [目录结构](#目录结构)
   - [根目录](#根目录)
 - [fastify扩展说明(decorate)](#fastify扩展说明decorate)
@@ -132,6 +133,11 @@
 &emsp;&emsp;默认的Web服务，采用前后端分离策略。静态资源可以部署在oss中，并采用cdn加速。非入口(用户在浏览器直接输入)URL，为immutable assets。可以安全的设置为用不变化。api资源需部署于可计算环境下。
 &emsp;&emsp;pipeline支持的部署，本地环境采用docker部署依赖服务，$webXXX服务被忽略。其它节点采用[masterless salt](https://docs.saltproject.io/en/latest/topics/tutorials/quickstart.html)。pipeline的使用细节，参考pipeline项目。
 
+## 缓冲说明
+
+&emsp;&emsp;服务器端的状态持久化，主要涉及缓冲机制。目前数据分为三层(前两层为缓冲)，内存层，网络内存层(redis)，数据库。内存层最节约内存的选择是集群友好的[memory map](https://www.npmjs.com/package/mmap-object)，默认使用了面向进程的[lru-cache](https://www.npmjs.com/package/lru-cache)。网络内存层选择redis，最后是数据层。
+
+&emsp;&emsp;缓冲服务不采用TTL机制，而是采用主动作废，通过redis的pub/sub机制来支持。当状态数据被更新时，发出缓冲作废的事件。注意：缓冲是一个依赖链，每次获取到缓冲对象，需要检查所有依赖状态时间戳，不满足时作废自身。
 
 # 目录结构
 
@@ -182,7 +188,7 @@
 - test 测试文件存放目录。
 - pvdev 由编辑器维护的数据目录
   - project.json 定义了项目的基础信息。其中$webapi的目录是当前项目目录，$webass指定了静态资源目录(如未指定，则为当前目录加ui构成目录,和当前目录同级)。
-  - schemas: 保存系统定义的业务级变量schma.
+  - schemas: 保存系统定义的业务级变量schma.schema的定义采用[objectmodel](https://objectmodel.js.org/)。
   - nodes: 定义了运行节点。子目录与config中的子目录相同。定义了目标集群的环境。其中dev为本地环境。详细信息参阅@masol/pipeline项目中的说明。
     - dev: 这是本地环境，如果未给出，采用默认定义。
       - node.json 定义了全部节点，并给出了登录方式。可索引secret中的文件。
@@ -204,6 +210,7 @@
 - s : [underscore.string](https://github.com/esamattis/underscore.string)。并在其下以名称空间的方式扩展了:
   - v : [validator.js](https://github.com/validatorjs/validator.js)。这些validator同时以format方式加入了[fastify内建ajv instance](https://ajv.js.org/)。
 - error: [http oritend error](https://github.com/ShogunPanda/http-errors-enhanced)提供的异常函数，有按照[http status code](https://github.com/ShogunPanda/http-errors-enhanced/blob/main/src/errors.ts)的对应快捷异常类。
+- om: [https://objectmodel.js.org/]: 动态类型检查(ObjectModel)更契合面向行为的思路，因此不推荐typescript,flow等编译期类型检查编译器，推荐采用soa.om来执行运行期类型检查。
 - shell: [以js虚拟shell实现](https://github.com/shelljs/shelljs)提供程序接口的shell界面，以使用当前用户维护系统。例如增加本地包的自维护性，因此额外扩展了两个函数(采用的包管理器通过env服务配置):
   - require(pkgName,opt?) async require pkg,如果失败，则install后重试。
   - import(pkgName,opt?) async import es6 pkg，如果失败，则install后重试。
@@ -244,7 +251,7 @@
   - domain: 保存了允许的domain名称，多个以空格分割。只有请求指定的domain,才会得到响应。否则会抛出bad request异常。
   - conf: 保存[fastify启动配置](https://www.fastify.io/docs/latest/Reference/Server/#factory)。如果配置了http2或者空的https。则在config/active/fastify下加载https.crt或https.key。tools中提供了openssl的自签名命令行。http跳转一是借助DNS，二是借助[fastify-https-redirect](https://github.com/tomsvogel/fastify-https-redirect)。推荐使用DNS。
     - logger: logger的可配置项，参考[pino配置对象](https://github.com/pinojs/pino/blob/master/docs/api.md#options-object)。pv-fastify允许logger值为字符串，此时其指向了logger对象定义模块,空为'./logger.js',pino的log系列方法的message格式，采用%s,%d,%o占位方式，[参考其文档](https://github.com/pinojs/pino/blob/master/docs/api.md#message)。
-- env: 定义了运行环境信息。返回env对象。
+- env: 定义了运行环境信息(这是一个fsm对象，用于管理本节点状态，进而管理全系统状态)。返回env对象。
   - conf
     - name: [string] 运行环境人读名称。
     - mname: [string] 运行环境机读名称——此名称也是保存配置的目录名称。
