@@ -97,18 +97,20 @@
    如果均正确输出版本号，则证明docker已安装；
 
 
-5. 安装vagrant
+5. 安装vagrant (根据需求如果想测试集群，并且没有多台服务器，需要安装vagrant，创建多个虚拟机来模拟集群环境)
    
    使用命令依次安装 
+
+   安装 `virtualbox`依赖
+
+   安装虚拟机 执行命令 `sudo apt install virtualbox -y`
+
    添加GPG秘钥 `wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg`
 
    添加vagrant软件源 `echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list`
 
    更新缓存并安装vagrant `sudo apt update && sudo apt install vagrant`
 
-6. 安装 `virtualbox`
-   
-   安装虚拟机 执行命令 `sudo apt install virtualbox -y`
 
 ## 二、测试环境
 
