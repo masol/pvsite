@@ -153,6 +153,14 @@
 
    安装pipeline的依赖模块并映射模块 `cd ~/pipeline/ && yarn install && yarn link pipeline`
 
+   **注意：** yarn link 作用是在开发过程中，pipeline包和项目pvsite相互依赖，可以将pipeline链接到pvsite项目中。
+
+   例如：我们在开发项目 `pvsite` 时需要使用本地开发的另外一个包 `pipeline`时，首先进入pipeline目录下，执行 `yarn link`,意思是在公共包管理路径`/usr/local/lib/node_modules/`连接了本地的 `pipeline`包。
+
+   然后在进入到 pvsite目录下，执行 `yarn link pipeline`，它就会去`/usr/local/lib/node_modules/`这个路径下寻找是否有这个包，如果有就建立软链接，直接在 pvsite项目中使用 pipeline包。
+
+   此时，我们在`pipeline`包做任何修改，都可以及时的更新到`pvsite`项目中。不需要在一遍一遍的发布pipeline包了，通常我们会在开发阶段会用到，在正式项目中只需要发布最后一个pipeline版本即可。
+
 2. 在pvdev下的cluster目录里新建test3目录下启用集群所使用的服务器，test3文件下执行， `vagrant up`
 
 3. 在pvsite文件下运行 `gulp status -t test3` 查看集群状态报告
