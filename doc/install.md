@@ -12,6 +12,7 @@
     - [Linux测试运行环境](#linux测试运行环境)
     - [Linux开发环境安装过程可能存在的报错信息](#linux开发环境安装过程可能存在的报错信息)
   - [Windows环境安装](#windows环境安装)
+    - [Windows开发环境安装依赖](#windows开发环境安装依赖)
   - [Mac OS环境安装](#mac-os环境安装)
 
 
@@ -216,6 +217,8 @@ If it's at a non-standard location, specify the URL with the DOCKER_HOST environ
 
 ## Windows环境安装
 
+### Windows开发环境安装依赖
+
 1. 安装 `git`
 
    https://git-scm.com/downloads
@@ -249,6 +252,14 @@ If it's at a non-standard location, specify the URL with the DOCKER_HOST environ
 6. 安装 `docker`
 
    https://www.docker.com/
+
+7. 开启 `Hyper-V`
+
+   https://www.runoob.com/docker/windows-docker-install.html
+
+8. 安装 `WSL2 Linux 内核更新包`
+
+   https://learn.microsoft.com/zh-cn/windows/wsl/install-manual#step-4---download-the-linux-kernel-update-package
 
 文档未完，正在测试完善，持续更新中...
 
