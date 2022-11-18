@@ -111,7 +111,7 @@
 
    安装 `docker-compose`
 
-   下载安装包 `sudo curl -L "https://ghproxy.com/https://github.com/docker/compose/releases/download/2.12.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose`
+   下载安装包 `sudo curl -L "https://ghproxy.com/https://github.com/docker/compose/releases/download/2.12.2/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose`
 
    添加执行权限 `sudo chmod +x /usr/local/bin/docker-compose`
 
