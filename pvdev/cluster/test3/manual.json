@@ -1,23 +1,9 @@
 {
   "node1":{
     "type": "ssh",
-    "host": "192.168.56.101",
+    "host": "127.0.0.1",
     "username": "root",
-    "password":"test12345678",
-    "services":["elastic","postgres"]
-  },
-  "node2":{
-    "type": "ssh",
-    "host": "192.168.56.102",
-    "username": "root",
-    "password":"test12345678",
-    "services":["redis"]
-  },
-  "node3":{
-    "type": "ssh",
-    "host": "192.168.56.103",
-    "username": "root",
-    "password":"test12345678",
-    "services":["$webapi"]
+    "password":"$vault:munaoroot",
+    "services":["elastic","postgres","redis","$webapi","cloudserver"]
   }
 }
