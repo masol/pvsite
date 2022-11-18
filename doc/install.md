@@ -1,30 +1,40 @@
-<h1>开发环境安装</h1> 
+<h1>环境安装</h1> 
 
 <h1>目录</h1>
 
-- [使用说明](#使用说明)
-- [Linux安装开发环境](#linux安装开发环境)
-    - [Linux安装开发环境依赖](#linux安装开发环境依赖)
-    - [Linux测试开发环境](#linux测试开发环境)
-    - [Linux安装开发环境过程可能存在的报错信息](#linux安装开发环境过程可能存在的报错信息)
-- [Windows安装开发环境](#windows安装开发环境)
-- [Mac OS安装开发环境](#mac-os安装开发环境)
+- [环境说明](#环境说明)
+  - [开发环境](#开发环境)
+  - [运行环境](#运行环境)
+- [环境安装](#环境安装)
+  - [Linux环境安装](#linux环境安装)
+    - [Linux开发环境安装依赖](#linux开发环境安装依赖)
+    - [Linux运行环境安装：](#linux运行环境安装)
+    - [Linux测试运行环境](#linux测试运行环境)
+    - [Linux开发环境安装过程可能存在的报错信息](#linux开发环境安装过程可能存在的报错信息)
+  - [Windows环境安装](#windows环境安装)
+  - [Mac OS环境安装](#mac-os环境安装)
 
 
 
-# 使用说明
+# 环境说明
 
-   &emsp;&emsp;我们目前的运行环境只支持Linux环境及其衍生版，不假定您使用的是Windows服务器，如果您使用了Windows服务器，pipeline的功能不支持，你只能手动安装修改，而本地开发环境支持主流操作系统，开发环境为了简化环境依赖，用docker给你安装依赖环境，用pipeline工具查看的时候，以`$`美元符号为开头的，是你这个项目本身生成的服务，例如`$webapi`, 开发完成之后最后是一个进程，和别的服务并无区别，就等于开发了一个别的服务，只不过你依赖了别的服务，比如你依赖了redis数据库，但是你本身也是个服务，由于在开发环境下， 你的要求是你马上一个改动，马上就能看到结果。
+<h3>环境分为开发环境和运行环境；</h3>
 
-   &emsp;&emsp;所以在开发环境下，只给你部署了依赖环境，然后有一个模拟环境，确保让你一改动马上实时更新，所以在开发环境下，`gulp`执行完之后，你要启动你自身开发的服务，比如你要启动你的客户端页面，就要在客户端页面的项目下执行 `npm run dev`
-   
-   &emsp;&emsp;如果你要测试你的API，也是执行 `npm run dev`，命令都是一样的，执行的目录不一样，而你测试出来的结果，最后开发部署。
+## 开发环境
+&emsp;&emsp;让你的项目在你本机上运行起来的环境，我们称为开发环境，这种环境有个特殊之处，他的目的是让你在本地能够更好的开发，他是协助你开发的，而不是协助你运行的，开发环境使用上和运行环境无缝衔接，也就是，不做任何修改能部署到运行环境上去。开发环境安装完成就绪以后，你的其他运行环境是由在你开发环境下执行pipeline，部署上去，一个项目会需要若干进程、若干服务彼此依赖。有些是外部服务，有些是自己的服务，那么自己开发的服务，我们都是以`$`美元符号为开头命名的，是项目本身代码生成的服务，例如`$webapi`指的api服务，`$webass`指定了静态资源的服务，`$webmob` 是手机版的服务，现阶段你只需要知道如何把本地环境装上，然后在开发环境下执行pipeline了，开发环境也可以称为自举环境，如果在开发环境修改代码，执行pipeline指定参数，就能够部署到项目中。
 
-# Linux安装开发环境 
+## 运行环境
+&emsp;&emsp;运行环境就是真正为用户提供服务的环境，通常是运行在云上，比如阿里云、腾讯云、百度云或者自己托管的主机上。我们目前的运行环境只支持Linux环境及其衍生版。在你本机开发环境就绪以后可以通过pipeline快速部署。
+
+![开发环境部署到运维环境](../image/bushu.png)
+
+# 环境安装
+
+## Linux环境安装
 
 （***说明：ubuntu最低版本要求20.4***）
 
-### Linux安装开发环境依赖
+### Linux开发环境安装依赖
 
 1. 安装 `node`
  
@@ -62,7 +72,7 @@
    如果均正确输出版本号，则证明gulp已安装；
 
 
-3. 安装 `Yarn`
+3. 安装 `yarn`
 
     导入软件源的 GPG key 并且添加 Yarn APT 软件源到你的系统，运行下面的命令：
 
@@ -80,7 +90,7 @@
 
     `sudo apt install --no-install-recommends yarn`
 
-    测试Yarn是否安装
+    测试yarn是否安装
 
      > yarn -v
 
@@ -121,23 +131,14 @@
 
    如果均正确输出版本号，则证明docker已安装；
 
+### Linux运行环境安装：
+&emsp;&emsp;您的目标集群，拥有状态。例如未初始化，软件安装完毕但数据库未初始化...这些状态由各自对应的task来更改。这些task按照状态变迁的顺序执行，就称为pipeline。
 
-5. 安装vagrant (根据需求如果想测试集群，并且没有多台服务器，需要安装vagrant，创建多个虚拟机来模拟集群环境)
-   
-   使用命令依次安装 
+&emsp;&emsp;之所以需要Pipeline|Infrastruction As Code。是因为实践中，pipeline实际是平面的，有两个维度。X轴是目标集群当前的状态，Y轴是您做的修改，例如部分代码修正，某台机器加入/撤离集群。pipeline就是负责将您的修改同步到现实。
 
-   安装 `virtualbox`依赖
-
-   安装虚拟机 执行命令 `sudo apt install virtualbox -y`
-
-   添加GPG秘钥 `wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg`
-
-   添加vagrant软件源 `echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list`
-
-   更新缓存并安装vagrant `sudo apt update && sudo apt install vagrant`
-
-
-### Linux测试开发环境
+&emsp;&emsp;运行环境通过在`pvdev/cluster`目录中定义，并编译到config目录下，特定环境通过建立符号链接active来支持。在`pvdev/cluster/default.json`及`pvdev/cluster/{cluster name}/config/default.json`中添加服务与配置。pipeline会将集群配置合并全局配置，然后将其更新至`config/{cluster name}/default.json`
+  
+### Linux测试运行环境
 
 1. 克隆 `pvsite`文件
    
@@ -161,18 +162,34 @@
 
    此时，我们在`pipeline`包做任何修改，都可以及时的更新到`pvsite`项目中。不需要在一遍一遍的发布pipeline包了，通常我们会在开发阶段会用到，在正式项目中只需要发布最后一个pipeline版本即可。
 
-2. 在pvdev下的cluster目录里新建test3目录下启用集群所使用的服务器，test3文件下执行， `vagrant up`
+***注意：*** 根据需求如果想测试集群，并且没有多台服务器，需要安装vagrant，创建多个虚拟机来模拟集群环境。
 
-3. 在pvsite文件下运行 `gulp status -t test3` 查看集群状态报告
+2. 安装vagrant 
+   
+   使用命令依次安装 
+
+   安装 `virtualbox`依赖
+
+   安装虚拟机 执行命令 `sudo apt install virtualbox -y`
+
+   添加GPG秘钥 `wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg`
+
+   添加vagrant软件源 `echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list`
+
+   更新缓存并安装vagrant `sudo apt update && sudo apt install vagrant`
+
+3. 在pvdev下的cluster目录里新建test3目录下启用集群所使用的服务器，test3文件下执行， `vagrant up`
+
+4. 在pvsite文件下运行 `gulp status -t test3` 查看集群状态报告
    
    ![集群状态报告](../image/test3.png)
 
-4. 在pvsite文件下运行 `gulp deploy -t test3` 部署集群节点
+5. 在pvsite文件下运行 `gulp deploy -t test3` 部署集群节点
 
    ![部署集群节点](../image/gulpdeploy1.png)
 
 
-### Linux安装开发环境过程可能存在的报错信息
+### Linux开发环境安装过程可能存在的报错信息
 
 
 1. 报错 Version in "/home/wware/pvsite/config/dev/docker-compose.yml" is unsupported. You might be seeing this error because you're using the wrong Compose file version. Either specify a supported version (e.g "2.2" or "3.3") and place your service definitions under the `services` key, or omit the `version` key and place your service definitions at the root of the file to use version 1.
@@ -197,10 +214,9 @@ If it's at a non-standard location, specify the URL with the DOCKER_HOST environ
 
     `sudo newgrp docker`
 
-# Windows安装开发环境
+## Windows环境安装
 
 文档正在完善
 
-# Mac OS安装开发环境
-
+## Mac OS环境安装
 文档正在完善
