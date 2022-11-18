@@ -216,7 +216,41 @@ If it's at a non-standard location, specify the URL with the DOCKER_HOST environ
 
 ## Windows环境安装
 
-文档正在完善
+1. 安装 `git`
+
+   https://git-scm.com/downloads
+
+2. 安装 `python3.11`
+
+   https://www.python.org/downloads/windows/
+
+3. 安装 `Visual Studio Community 2022` 并安装C++环境
+
+   https://visualstudio.microsoft.com/zh-hans/downloads/
+
+4. 安装 `nvm`
+
+   https://github.com/coreybutler/nvm-windows/releases
+
+5. 安装 `node`
+   
+   安装node最新版本 `nvm install --lts`
+
+   切换npm源为国内源 `npm config set registry https://registry.npmmirror.com`
+
+   安装 `gulp`
+   
+   `npm install -g gulp-cli`
+
+   安装 `yarn`
+
+    `npm install -g yarn`
+
+6. 安装 `docker`
+
+   https://www.docker.com/
+
+文档未完，正在测试完善，持续更新中...
 
 ## Mac OS环境安装
 文档正在完善
