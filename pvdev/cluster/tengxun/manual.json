@@ -1,0 +1,9 @@
+{
+  "debian11":{
+    "type": "ssh",
+    "host": "43.143.136.180",
+    "username": "root",
+    "password":"$vault:munaoroot",
+    "services":["elastic","postgres","redis","$webapi"]
+  }
+}

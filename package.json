@@ -48,14 +48,13 @@
     "fastify-https-redirect": "^1.0.4",
     "fastify-multer": "^2.0.3",
     "fastify-plugin": "^4.2.1",
-    "ioredis": "^5.2.3",
+    "ioredis": "^5.2.4",
     "knex": "^2.3.0",
     "knex-utils": "^5.5.1",
     "objection": "^3.0.1",
     "passport-local": "^1.0.0",
     "pg": "^8.8.0",
-    "qs": "^6.11.0",
-    "redis": "^4.3.0"
+    "qs": "^6.11.0"
   },
   "devDependencies": {
     "eslint": "^8.0.1",

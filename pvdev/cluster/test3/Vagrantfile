@@ -112,7 +112,7 @@ Vagrant.configure("2") do |config|
     echo -e "test12345678\ntest12345678" | passwd root
     echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
     sed -in 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
-    service ssh restart
+    systemctl restart sshd
   SHELL
 
   # config.vm.network :forwarded_port, guest: 22, disabled: true
