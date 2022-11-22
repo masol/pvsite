@@ -170,7 +170,7 @@
 
    `git clone https://gitlab.wware.org/pub/pipeline.git`
 
-   安装pipeline的依赖模块并映射模块 `cd ~/pipeline/ && yarn install && yarn link pipeline`
+   安装pipeline的依赖模块并映射模块 `cd ~/pipeline/ && yarn install && yarn link`
 
    **注意：** yarn link 作用是在开发过程中，pipeline包和项目pvsite相互依赖，可以将pipeline链接到pvsite项目中。
 
