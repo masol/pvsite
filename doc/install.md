@@ -33,7 +33,7 @@
 
 ## Linux环境安装
 
-（***说明：ubuntu最低版本要求20.4***）
+（***说明：ubuntu最低版本要求20.04***）
 
 ### Linux开发环境安装依赖
 
@@ -43,9 +43,18 @@
 
     安装依赖软件 `sudo apt install curl git vim make g++ -y`
     
-    安装nvm `curl -o- https://ghproxy.com/https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash`
+    安装nvm
+    ```
+    curl -o- https://ghproxy.com/https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+    ```
 
     安装node最新版本 `nvm install --lts`
+    
+    设置全局node
+    ```
+    sudo ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/node" "/usr/local/bin/node"
+    sudo ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/npm" "/usr/local/bin/npm"
+    ```
 
     切换npm源为国内源 `npm config set registry https://registry.npmmirror.com`
  
@@ -74,6 +83,14 @@
 
 
 3. 安装 `yarn`
+
+   方法一（推荐）:
+
+   一种跨平台安装方式，直接执行一个命令来安装
+
+   `npm install -g yarn`
+
+   方法二：
 
     导入软件源的 GPG key 并且添加 Yarn APT 软件源到你的系统，运行下面的命令：
 
@@ -118,9 +135,9 @@
 
    添加docker组 `sudo groupadd docker`
 
-   将当前用户加入docker组 `sudo usermod -aG docker $USER`
+   将当前用户加入docker组 `sudo usermod -aG docker $USER` ，注销并重新登录以刷新组更改
 
-   激活对docker组的更改 `newgrp docker`
+   也可以执行命令 `newgrp docker` 来刷新组更改
 
    测试docker是否安装
    
@@ -213,7 +230,7 @@ If it's at a non-standard location, specify the URL with the DOCKER_HOST environ
 
     `sudo usermod -aG docker $USER`
 
-    `sudo newgrp docker`
+    `newgrp docker`
 
 ## Windows环境安装
 
