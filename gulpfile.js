@@ -11,6 +11,7 @@
 
 const gulpInst = require('gulp')
 const soa = require('@masol/soa')
+const AWS = require('aws-sdk')
 const os = require('os')
 
 // 添加默认并发限制为核心数X2，目前只影响通过SFTP上下传目录时的并发，尚未影响node操作
@@ -38,6 +39,7 @@ const opts = {
   args,
   config,
   gulpInst,
+  AWS,
   ctx: {},
   soa: soa.getUtil(config)
 }
