@@ -19,21 +19,28 @@
 
 # 环境说明
 
-<h3>环境分为开发环境和运行环境；</h3>
+&emsp;&emsp;环境，指的是使用服务所涉及的所有的软硬件（用户要使用这个服务所需的一系列软硬件），这些环境之间是有彼此依赖的，这些依赖不仅仅是软件依赖硬件，也有可能是硬件依赖软件，例如，一个扫地机器人，他不是本地运营而是受中央服务器控制的扫地机器人，那么，这个扫地机器人的硬件是依赖中央服务器软件的。通常我们以外部为例，为了正常运行外部服务器，他需要若干服务联动，你的代码会依赖若干服务，比如支付、短信、数据库...，为了让你的代码正常运行，这些所需要的服务需要被安装上，希望能够正常的安装及配置，使其能正常工作，那么，让环境就绪所准备这个环境的动作，我们称为部署。
+
+&emsp;&emsp;这里我们给出一个约定，您使用代码自行开发的服务，无论载体是软件还是硬件，那么，我们都以`$`美元符号开头，是项目本身代码生成的服务，例如`$webapi`指的api服务，`$webass`指定了静态资源的服务，`$webmob` 是手机版的服务，别人提供的服务，无论软硬件我们都不以$美元开头的。理解完环境之后，我们把环境分为两个环境，开发环境和运行环境。
+
+&emsp;&emsp;区别是开发环境也能够运行自身的服务，提供测试等服务，当然通常这个服务只为开发者一个人提供的，例如它涉及一些安全性及其他各类考量会减少很多，而运行环境是为很多人提供服务的，运行环境中有一种特殊的环境，是测试型运行环境，毕竟开发环境和运行环境并不完全一致，有的时候开发环境没有问题，运行环境有问题，测试环境我们可以选择物理机也可以选择虚拟机，而虚拟机通常我们用vagrant来管理，可以创建多个虚拟机来模拟集群环境。
+
+![开发环境部署到运维环境](../image/bushuhuanjing.png)
 
 ## 开发环境
-&emsp;&emsp;让你的项目在你本机上运行起来的环境，我们称为开发环境，这种环境有个特殊之处，他的目的是让你在本地能够更好的开发，他是协助你开发的，而不是协助你运行的，开发环境使用上和运行环境无缝衔接，也就是，不做任何修改能部署到运行环境上去。开发环境安装完成就绪以后，你的其他运行环境是由在你开发环境下执行pipeline，部署上去，一个项目会需要若干进程、若干服务彼此依赖。有些是外部服务，有些是自己的服务，那么自己开发的服务，我们都是以`$`美元符号为开头命名的，是项目本身代码生成的服务，例如`$webapi`指的api服务，`$webass`指定了静态资源的服务，`$webmob` 是手机版的服务，现阶段你只需要知道如何把本地环境装上，然后在开发环境下执行pipeline了，开发环境也可以称为自举环境，如果在开发环境修改代码，执行pipeline指定参数，就能够部署到项目中。
+&emsp;&emsp;开发环境是本机上运行起来的环境，他的目的是让你在本地能够更好的开发，他是协助你开发的，而不是协助你运行的，同时它的pipeline默认环境使用docker来安装它的依赖服务，开发环境默认一切都是拿IP访问的，如果需要域名支持修改本地host表，都是模拟环境，无需做正式运行环境申请工作，现阶段你只需要知道如何把开发环境装上，然后在开发环境下执行pipeline了，开发环境也可以称为自举环境，如果在开发环境修改代码，执行pipeline指定参数，就能够部署到项目中。
 
 ## 运行环境
-&emsp;&emsp;运行环境就是真正为用户提供服务的环境，通常是运行在云上，比如阿里云、腾讯云、百度云或者自己托管的主机上。我们目前的运行环境只支持Linux环境及其衍生版。在你本机开发环境就绪以后可以通过pipeline快速部署。
+&emsp;&emsp;运行环境就是真正为用户提供服务的环境，通常是运行在云上，比如阿里云、腾讯云、百度云或者自己托管的主机上。运行环境通常不使用docker，而是直接安装服务，我们的运行环境部署通过pvdev/cluster目录中定义一个节点，运行环境支持的主机（链接如何获取服务器）、域名（设计DNS，域名备案），运行环境准备的时候涉及到一些人工的工作（列出来），新需要用OSS用来做静态资源存储，也就是UI部分，如果是APP，你还需要证书和签名、发布到对应的APP市场（安卓、苹果、鸿蒙），微信小程序需要的准备工作等，短信、支付、需要配置的环境也列出来，项目中需要哪些服务，如果需要人工工作的，需要自行处理，如果部署，你需要将秘钥（secretKey）填上去，pipeline会自动帮您部署了，但是这个secretKey需要你人工得到填写上去，(***还没有更新完***...)
 
-![开发环境部署到运维环境](../image/bushu.png)
+&emsp;&emsp;外部服务分为两个服务器的，一个服务器专门提供API的，前后端是分离的，另外一个是提供UI，通过CDN加速，而且带宽性价比更高，这是最优化的价格，而且对缓冲到本地是没有问题的，
+
 
 # 环境安装说明
 
 ## Linux环境安装
 
-（***说明：ubuntu最低版本要求20.4***）
+（***说明：ubuntu最低版本要求20.04***）
 
 ### Linux开发环境安装依赖
 
@@ -43,9 +50,18 @@
 
     安装依赖软件 `sudo apt install curl git vim make g++ -y`
     
-    安装nvm `curl -o- https://ghproxy.com/https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash`
+    安装nvm
+    ```
+    curl -o- https://ghproxy.com/https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+    ```
 
     安装node最新版本 `nvm install --lts`
+    
+    设置全局node
+    ```
+    sudo ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/node" "/usr/local/bin/node"
+    sudo ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/npm" "/usr/local/bin/npm"
+    ```
 
     切换npm源为国内源 `npm config set registry https://registry.npmmirror.com`
  
@@ -74,6 +90,14 @@
 
 
 3. 安装 `yarn`
+
+   方法一（推荐）:
+
+   一种跨平台安装方式，直接执行一个命令来安装
+
+   `npm install -g yarn`
+
+   方法二：
 
     导入软件源的 GPG key 并且添加 Yarn APT 软件源到你的系统，运行下面的命令：
 
@@ -118,9 +142,9 @@
 
    添加docker组 `sudo groupadd docker`
 
-   将当前用户加入docker组 `sudo usermod -aG docker $USER`
+   将当前用户加入docker组 `sudo usermod -aG docker $USER` ，注销并重新登录以刷新组更改
 
-   激活对docker组的更改 `newgrp docker`
+   也可以执行命令 `newgrp docker` 来刷新组更改
 
    测试docker是否安装
    
@@ -153,7 +177,7 @@
 
    `git clone https://gitlab.wware.org/pub/pipeline.git`
 
-   安装pipeline的依赖模块并映射模块 `cd ~/pipeline/ && yarn install && yarn link pipeline`
+   安装pipeline的依赖模块并映射模块 `cd ~/pipeline/ && yarn install && yarn link`
 
    **注意：** yarn link 作用是在开发过程中，pipeline包和项目pvsite相互依赖，可以将pipeline链接到pvsite项目中。
 
@@ -213,7 +237,7 @@ If it's at a non-standard location, specify the URL with the DOCKER_HOST environ
 
     `sudo usermod -aG docker $USER`
 
-    `sudo newgrp docker`
+    `newgrp docker`
 
 ## Windows环境安装
 
@@ -237,7 +261,62 @@ If it's at a non-standard location, specify the URL with the DOCKER_HOST environ
 
 5. 安装 `node`
    
-   安装node最新版本 `nvm install --lts`
+   Windows 安装包(.msi)
+
+   64 位安装包下载地址 : http://nodejs.org/dist/v0.10.26/x64/node-v0.10.26-x64.msi
+
+   ![下载包](../image/node1.jpg)
+
+   本文实例以 v0.10.26 版本为例，其他版本类似。
+
+   安装步骤：
+
+   步骤 1 : 双击下载后的安装包 node-v0.10.26-x86.msi，如下所示：
+
+   ![安装包](../image/node2.png)   
+
+   步骤 2 : 点击以上的Run(运行)，将出现如下界面：
+
+   ![安装包运行](../image/node3.png)   
+
+   步骤 3 : 勾选接受协议选项，点击 next（下一步） 按钮 :
+
+   ![安装包协议](../image/node4.png)
+
+   步骤 4 : Node.js默认安装目录为 "C:\Program Files\nodejs\" , 你可以修改目录，并点击 next（下一步）：
+
+   ![安装目录](../image/node5.png)
+
+   步骤 5 : 点击树形图标来选择你需要的安装模式 , 然后点击 next 进入下一步
+
+   ![安装模式](../image/node6.png)
+
+   步骤 6 :点击 Install（安装） 开始安装Node.js。你也可以点击 Back（返回）来修改先前的配置。 然后并点击 next进入下一步：
+
+   ![安装模式](../image/node7.png)
+
+   安装过程：
+
+   ![安装模式](../image/node8.png)
+
+   点击 Finish（完成）按钮退出安装向导。
+
+   ![安装模式](../image/node9.png)
+
+   检测PATH环境变量是否配置了Node.js，点击开始=》运行=》输入"cmd" => 输入命令"path"，输出如下结果：
+
+   ```bash
+   PATH=C:\oraclexe\app\oracle\product\10.2.0\server\bin;C:\Windows\system32;
+   C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;
+   c:\python32\python;C:\MinGW\bin;C:\Program Files\GTK2-Runtime\lib;
+   C:\Program Files\MySQL\MySQL Server 5.5\bin;C:\Program Files\nodejs\;
+   C:\Users\rg\AppData\Roaming\npm
+   ```
+   我们可以看到环境变量中已经包含了 C:\Program Files\nodejs\
+
+   检查Node.js版本
+
+   ![安装模式](../image/node10.png)
 
    切换npm源为国内源 `npm config set registry https://registry.npmmirror.com`
 
@@ -251,13 +330,12 @@ If it's at a non-standard location, specify the URL with the DOCKER_HOST environ
 
 6. 安装 `docker`
 
-   https://www.docker.com/
+   安装包下载地址：https://www.docker.com/
 
-7. 开启 `Hyper-V`
+   ![安装docker](../image/docker1.png)
 
-   https://www.runoob.com/docker/windows-docker-install.html
 
-8. 安装 `WSL2 Linux 内核更新包`
+7. 安装 `WSL2 Linux 内核更新包`
 
    https://learn.microsoft.com/zh-cn/windows/wsl/install-manual#step-4---download-the-linux-kernel-update-package
 
