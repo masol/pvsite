@@ -335,12 +335,7 @@ If it's at a non-standard location, specify the URL with the DOCKER_HOST environ
    ![安装docker](../image/docker1.png)
 
 
-
-7. 开启 `Hyper-V`
-
-   https://www.runoob.com/docker/windows-docker-install.html
-
-8. 安装 `WSL2 Linux 内核更新包`
+7. 安装 `WSL2 Linux 内核更新包`
 
    https://learn.microsoft.com/zh-cn/windows/wsl/install-manual#step-4---download-the-linux-kernel-update-package
 
