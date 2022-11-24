@@ -212,6 +212,8 @@ else
     cd $HOME/source/pvsite/node_modules/node-pty && yarn install
     cd $HOME/source/pvsite/
     yarn link "@masol/pipeline"
+    [ -e $HOME/source/pvsite/config/dev ] || mkdir -p $HOME/source/pvsite/config/dev
+    [ -e $HOME/source/pvsite/config/active ] || ln -s $HOME/source/pvsite/config/dev $HOME/source/pvsite/config/active
     newgrp docker << END
     gulp deploy
 END
