@@ -41,8 +41,15 @@
 ## Linux环境安装
 
 （***说明：ubuntu最低版本要求20.04***）
+### Ubuntu开发环境一键安装
 
-### Linux开发环境安装依赖
+   ```
+   bash <(curl -s https://gitlab.wware.org/pub/pvsite/raw/master/pvdev/tools/localinstall_ubuntu.sh)
+   ```
+
+   注意：脚本会在用户家目录创建一个`source`文件夹，所需项目文件都会放在此目录
+
+### Ubuntu开发环境手动安装步骤
 
 1. 安装 `node`
  
@@ -156,28 +163,29 @@
 
    如果均正确输出版本号，则证明docker已安装；
 
-### Linux运行环境安装：
-&emsp;&emsp;您的目标集群，拥有状态。例如未初始化，软件安装完毕但数据库未初始化...这些状态由各自对应的task来更改。这些task按照状态变迁的顺序执行，就称为pipeline。
-
-&emsp;&emsp;之所以需要Pipeline|Infrastruction As Code。是因为实践中，pipeline实际是平面的，有两个维度。X轴是目标集群当前的状态，Y轴是您做的修改，例如部分代码修正，某台机器加入/撤离集群。pipeline就是负责将您的修改同步到现实。
-
-&emsp;&emsp;运行环境通过在`pvdev/cluster`目录中定义，并编译到config目录下，特定环境通过建立符号链接active来支持。在`pvdev/cluster/default.json`及`pvdev/cluster/{cluster name}/config/default.json`中添加服务与配置。pipeline会将集群配置合并全局配置，然后将其更新至`config/{cluster name}/default.json`
-  
-### Linux测试运行环境
-
-1. 克隆 `pvsite`文件
-   
-   执行 `git clone https://gitlab.wware.org/pub/pvsite.git`
-
-   安装pvsite的依赖模块 `cd ~/pvsite/ && yarn install`
-
-   安装node-pty的依赖模块 `cd node_modules/node-pty && npm install`
+5. 克隆所需代码仓库
 
    克隆 `pipeline`文件
 
    `git clone https://gitlab.wware.org/pub/pipeline.git`
 
    安装pipeline的依赖模块并映射模块 `cd ~/pipeline/ && yarn install && yarn link`
+
+   克隆 `pvsite`文件
+
+   `git clone https://gitlab.wware.org/pub/pvsite.git`
+
+   安装pvsite的依赖模块 `cd ~/pvsite/ && yarn install`
+
+   安装node-pty的依赖模块 `cd node_modules/node-pty && npm install`
+
+   添加刚映射的模块 `cd ~/pvsite/ && yarn link "@masol/pipeline"`
+
+   创建所需文件夹
+   ```
+   mkdir -p ~/pvsite/config/dev
+   ln -s ~/pvsite/config/dev ~/pvsite/config/active
+   ```
 
    **注意：** yarn link 作用是在开发过程中，pipeline包和项目pvsite相互依赖，可以将pipeline链接到pvsite项目中。
 
@@ -187,23 +195,98 @@
 
    此时，我们在`pipeline`包做任何修改，都可以及时的更新到`pvsite`项目中。不需要在一遍一遍的发布pipeline包了，通常我们会在开发阶段会用到，在正式项目中只需要发布最后一个pipeline版本即可。
 
-***注意：*** 根据需求如果想测试集群，并且没有多台服务器，需要安装vagrant，创建多个虚拟机来模拟集群环境。
+6. 本地环境构建
 
-2. 安装vagrant 
+   `cd ~/pvsite/ && gulp deploy`
+
+7. 查看本地环境状态
+
+   `cd ~/pvsite/ && gulp status`
+
+   ##### 本地环境安装步骤到此结束。
+
+### Linux运行环境安装：
+&emsp;&emsp;您的目标集群，拥有状态。例如未初始化，软件安装完毕但数据库未初始化...这些状态由各自对应的task来更改。这些task按照状态变迁的顺序执行，就称为pipeline。
+
+&emsp;&emsp;之所以需要Pipeline|Infrastruction As Code。是因为实践中，pipeline实际是平面的，有两个维度。X轴是目标集群当前的状态，Y轴是您做的修改，例如部分代码修正，某台机器加入/撤离集群。pipeline就是负责将您的修改同步到现实。
+
+&emsp;&emsp;运行环境通过在`pvdev/cluster`目录中定义，并编译到config目录下，特定环境通过建立符号链接active来支持。在`pvdev/cluster/default.json`及`pvdev/cluster/{cluster name}/config/default.json`中添加服务与配置。pipeline会将集群配置合并全局配置，然后将其更新至`config/{cluster name}/default.json`
+  
+#### 安装步骤
+
+1. 克隆所需代码仓库文件
+
+   克隆 `pipeline`文件
+
+   `git clone https://gitlab.wware.org/pub/pipeline.git`
+
+   安装pipeline的依赖模块并映射模块 `cd ~/pipeline/ && yarn install && yarn link`
+   克隆 `pvsite`文件
    
+   执行 `git clone https://gitlab.wware.org/pub/pvsite.git`
+
+   安装pvsite的依赖模块 `cd ~/pvsite/ && yarn install`
+
+   安装node-pty的依赖模块 `cd node_modules/node-pty && npm install`
+
+   添加刚映射的模块 `cd ~/pvsite/ && yarn link "@masol/pipeline"`
+
+   创建所需文件夹
+   ```
+   mkdir -p ~/pvsite/config/dev
+   ln -s ~/pvsite/config/dev ~/pvsite/config/active
+   ```
+
+2. 修改manual.json文件
+
+   在`pvdev/cluster/`可以创建子目录，并在子目录中新建文件`manual.json`
+
+   例如：`pvdev/cluster/test3/manual.json`
+   在这个文件中可以填写服务器的验证信息，及安装服务：
+
+   ```
+   {
+      "node1":{
+         "type": "ssh",
+         "host": "192.168.56.101",
+         "username": "root",
+         "password":"test12345678",
+         "services":["elastic","postgres"]
+      },
+      "node2":{
+         "type": "ssh",
+         "host": "192.168.56.102",
+         "username": "root",
+         "password":"test12345678",
+         "services":["redis"]
+      },
+      "node3":{
+         "type": "ssh",
+         "host": "192.168.56.103",
+         "username": "root",
+         "password":"test12345678",
+         "services":["$webapi"]
+      }
+   }
+   ```
+
+2. ***为了测试集群环境，这里使用 Vagrant + Virtualbox 创建虚拟机模拟集群环境***
+
    使用命令依次安装 
 
-   安装 `virtualbox`依赖
+   1. 安装 `virtualbox`
 
-   安装虚拟机 执行命令 `sudo apt install virtualbox -y`
+      执行命令 `sudo apt install virtualbox -y`
 
-   添加GPG秘钥 `wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg`
+   2. 安装`vagrant`
 
-   添加vagrant软件源 `echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list`
+      添加GPG秘钥 `wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg`
 
-   更新缓存并安装vagrant `sudo apt update && sudo apt install vagrant`
+      添加vagrant软件源 `echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list`
 
-3. 在pvdev下的cluster目录里新建test3目录下启用集群所使用的服务器，test3文件下执行， `vagrant up`
+      更新缓存并安装vagrant `sudo apt update && sudo apt install vagrant`
+
+3. 在pvdev下的cluster目录中test3目录下有一个`Vagrantfile`文件，它可以启动集群所使用的服务器，在test3文件夹下执行， `vagrant up`
 
 4. 在pvsite文件下运行 `gulp status -t test3` 查看集群状态报告
    
