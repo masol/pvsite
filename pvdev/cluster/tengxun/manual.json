@@ -1,9 +1,33 @@
 {
-  "debian11":{
+  "$oss": {
+    "type": "cos",
+    "bucket": "munao-1313478131",
+    "accessKeyId": "AKID4yf7NRIzTkoepvrb6ORAXr6B3h6GG3e0",
+    "secretAccessKey": "$vault:tengxunkey",
+    "region": "ap-beijing",
+    "endpoint": "munao-1313478131.cos.accelerate.myqcloud.com"
+  },
+  "$dns": {
+    "$webass": [
+      "pinyan.tech",
+      "www.pinyan.tech"
+    ],
+    "$webapi": {
+      "domain": "api.pinyan.tech",
+      "key": "api.pinyan.tech.key",
+      "cert": "api.pinyan.tech_bundle.crt"
+    }
+  },
+  "debian11": {
     "type": "ssh",
     "host": "43.143.136.180",
     "username": "root",
-    "password":"$vault:munaoroot",
-    "services":["elastic","postgres","redis","$webapi"]
+    "password": "$vault:munaoroot",
+    "services": [
+      "elastic",
+      "postgres",
+      "redis",
+      "$webapi"
+    ]
   }
 }

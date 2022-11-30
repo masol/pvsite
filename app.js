@@ -7,6 +7,7 @@ const SOA = require('@masol/soa')
 const fp = require('fastify-plugin')
 
 process.env.NODE_CONFIG_DIR = process.env.NODE_CONFIG_DIR || path.join(__dirname, 'config', 'active')
+process.env.ALLOW_CONFIG_MUTATIONS = true
 const config = require('config')
 
 /// 从类url的配置中加载内容，如果没有，默认从文件中加载。
@@ -19,6 +20,8 @@ function loadCtx (urlCtx, defPath) {
 }
 const fastiConf = config.has('fastify.conf') ? Object.assign({}, config.get('fastify.conf')) : {}
 // const usehttps = false
+console.log('fastiConf=', fastiConf)
+console.log('config.get=', config.get('fastify'))
 if (fastiConf.http2 || fastiConf.https) {
   // usehttps = true
   fastiConf.https = fastiConf.https || {}

@@ -94,13 +94,14 @@ function start (app, args, opts) {
         clearInterval(intId)
       }
     }, 100)
-    cluster.on('exit', function (worker) {
-      console.log('Worker', worker.id, ' has exited.')
-    })
+    // cluster.on('exit', function (worker) {
+    //   console.log('Worker', worker.id, ' has exited.')
+    // })
   }
   // Start listening.
   if (doListen) {
     const isHttps = (opts.http2 || opts.https)
+    // console.log('isHtttps =', isHttps)
     if (isHttps) { // 是https时，80转发到443.
       const http = require('http')
       http.createServer(function (req, res) {
@@ -140,7 +141,8 @@ function start (app, args, opts) {
 
   const opts = Object.assign({}, appService.options)
   Object.assign(opts, filterArgs(args))
-  // console.log('fastify opts=', opts)
+  console.log('fastify opts=', opts)
+  console.log('appService.options opts=', appService.options)
   if (typeof opts.logger === 'undefined') {
     if (args.cmd) {
       opts.logger = {
