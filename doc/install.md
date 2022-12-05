@@ -14,6 +14,7 @@
     - [Linux开发环境安装过程可能存在的报错信息](#linux开发环境安装过程可能存在的报错信息)
   - [Windows环境安装](#windows环境安装)
     - [Windows开发环境安装依赖](#windows开发环境安装依赖)
+    - [Windows开发环境安装过程可能存在的报错信息](#Windows开发环境安装过程可能存在的报错信息)
   - [Mac OS环境安装](#mac-os环境安装)
 
 
@@ -309,7 +310,7 @@ For more on the Compose file format versions, see https://docs.docker.com/compos
 2. 报错 Couldn't connect to Docker daemon at http+docker://localhost - is it running?
 If it's at a non-standard location, specify the URL with the DOCKER_HOST environment variable.
 
-   解决：`docker-compose`
+   解决：升级`docker-compose`
    
    执行命令 `sudo curl -L "https://ghproxy.com/https://github.com/docker/compose/releases/download/2.12.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose`
 
@@ -422,6 +423,13 @@ If it's at a non-standard location, specify the URL with the DOCKER_HOST environ
 7. 安装 `WSL2 Linux 内核更新包`
 
    https://learn.microsoft.com/zh-cn/windows/wsl/install-manual#step-4---download-the-linux-kernel-update-package
+   
+### Windows开发环境安装过程可能存在的报错信息
+
+1. 报错 无法加载文件 C:\Users\DH\Desktop\cs\rename.ps1，因为在此系统上禁止运行脚本。有关详细信息，请参阅 https:/go.microsoft.com/fwlink/?LinkID=135170 中的 about_Execution_Policies。
+
+   解决：以管理员身份打开PowerShell 输入 `set-executionpolicy remotesigned` 选择 `Y`
+
 
 文档未完，正在测试完善，持续更新中...
 
