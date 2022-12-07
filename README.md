@@ -239,7 +239,7 @@
 # 服务与配置
 
 ## 配置说明
-&emsp;&emsp;当前激活的配置文件存放在目录config/active/default.XXX中。运行期代码并未维护配置之间的相关性，如果某个依赖服务未配置，直接报错。在admin的UI代码中维护配置的相关性。
+&emsp;&emsp;当前激活的配置文件存放在目录config/active/local.XXX中。运行期代码并未维护配置之间的相关性，如果某个依赖服务未配置，直接报错。在admin的UI代码中维护配置的相关性。
 
 &emsp;&emsp;如果想禁用一个内部预置开启的服务(含fastify plugins)。按照SDL,在配置中添加服务名，并设置disable:true。按照默认开启一个服务，只需在配置文件中添加服务入口即可，例如:`cors:{}`
 
