@@ -196,7 +196,7 @@
 
    更新缓存并安装vagrant `sudo apt update && sudo apt install vagrant`
 
-3. 在pvdev下的cluster目录里新建test3目录下启用集群所使用的服务器，test3文件下执行， `vagrant up`
+3. 在pvdev下的cluster目录里新建test3目录下启用集群所使用的服务器，test3文件下执行， vagrant up
 
 4. 在pvsite文件下运行 `gulp status -t test3` 查看集群状态报告
    
