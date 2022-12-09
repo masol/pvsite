@@ -20,8 +20,8 @@ function loadCtx (urlCtx, defPath) {
 }
 const fastiConf = config.has('fastify.conf') ? Object.assign({}, config.get('fastify.conf')) : {}
 // const usehttps = false
-console.log('fastiConf=', fastiConf)
-console.log('config.get=', config.get('fastify'))
+// console.log('fastiConf=', fastiConf)
+// console.log('config.get=', config.get('fastify'))
 if (fastiConf.http2 || fastiConf.https) {
   // usehttps = true
   fastiConf.https = fastiConf.https || {}

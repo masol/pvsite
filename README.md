@@ -217,7 +217,6 @@
   - install(pkgName) async 在主项目目录下，安装指定包。
   - pexec(cmdline,opt?) async 异步模式的exec。在执行外部命令时，不卡住主线程。
 - config: node-config加载的对象，除了加载的配置,额外扩展了如下函数([cofing的内建函数](https://github.com/node-config/node-config/wiki/Using-Config-Utilities))。所有插件/对象在加载时，需要把默认值写入config(如果config未指定)，后续请求服务时，可以通过config直接获取配置。(或者通过获取服务对象，来获取配置？)
-  - util.isDev() : [boolean]是否处于开发模式,以允许编辑模式。
   - util.path(string...): [string]返回参数构建的基于运行目录的目录。传入空，返回运行目录。
   - util.dget(path,def={}): 获取指定路径的配置，如果不存在，则返回def.
   - util.contain(string,string) : 给定属性路径下，如果是一个数组，是否包含指定的值。

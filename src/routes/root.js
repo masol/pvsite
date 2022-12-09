@@ -1,15 +1,16 @@
 'use strict'
 
 module.exports = async function (fastify, opts) {
-  const { soa, _ } = fastify
-  const passport = await soa.get('passport')
-  fastify.post('/',
-    {
-      preValidation: passport.authenticate('session')
-    },
+  const { _, soa } = fastify
+  fastify.get('/',
     async function (request, reply) {
+      const env = await soa.get('env')
+      if (await env.isDev()) {
+        const endPoint = `${request.protocol}:://${request.hostname}`
+        reply.redirect(302, `https://www.pinyan.tech/ide/index.html#ep=${endPoint}`)
+        // console.log('endPoint=', endPoint)
+      }
       const { log } = fastify
-      // console.log(fastify._)
       if (_.isInteger(request.session.a)) {
         request.session.a++
         console.log('request.session.a=', request.session.a)
