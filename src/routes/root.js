@@ -1,44 +1,17 @@
 'use strict'
 
 module.exports = async function (fastify, opts) {
-  const { _, soa } = fastify
+  const { soa } = fastify
   fastify.get('/',
     async function (request, reply) {
       const env = await soa.get('env')
       if (await env.isDev()) {
         const endPoint = `${request.protocol}:://${request.hostname}`
-        reply.redirect(302, `https://www.pinyan.tech/ide/index.html#ep=${endPoint}`)
+        reply.redirect(302, `http://localhost:5173/ide/index.html#ep=${endPoint}`)
+        // reply.redirect(302, `https://www.pinyan.tech/ide/index.html#ep=${endPoint}`)
         // console.log('endPoint=', endPoint)
-      }
-      const { log } = fastify
-      if (_.isInteger(request.session.a)) {
-        request.session.a++
-        console.log('request.session.a=', request.session.a)
       } else {
-        request.session.a = 0
+        return { root: true }
       }
-      // const upload = await soa.get('multer')
-      // const Handler = await passport.authenticate('session', { session: true, failureRedirect: '/login' })
-      // const Handler = await passport.authenticate('local', { authInfo: false })
-      // await Handler(request, reply)
-      log.debug('in root:request.isAuthenticated()=%s', request.isAuthenticated())
-      log.debug('in root:request.session.passport=%o', request.session.passport)
-      log.debug('in root:request.session.user=%o', request.session.user)
-      // console.log('request.file=', request.file)
-      // console.log('upload=', upload)
-      // await upload.single('file')
-      console.log('fastiy.hasContentTypeParser=', fastify.hasContentTypeParser('application/x-www-form-urlencoded'))
-      console.log('request.body=', request.body)
-      // fastify.log.debug("fastify.hasContentTypeParser('multipart/form-data')=%s", fastify.hasContentTypeParser('multipart'))
-      // fastify.log.debug('request.session.passport at root = %o', request.session.passport)
-      // fastify.log.debug('request.body=%o', request.body)
-      // // request.session.a = 1
-      // // const vault = await fastify.soa.get('vault')
-      // // fastify.log.debug('test vault from route:%o', vault)
-      // // console.log("fastify.static=",fastify.static)
-      // return request.logout()
-      return { root: true }
-    // request.session.authenticated = true
-    // reply.redirect('/example')
     })
 }
