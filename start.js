@@ -141,8 +141,8 @@ function start (app, args, opts) {
 
   const opts = Object.assign({}, appService.options)
   Object.assign(opts, filterArgs(args))
-  console.log('fastify opts=', opts)
-  console.log('appService.options opts=', appService.options)
+  // console.log('fastify opts=', opts)
+  // console.log('appService.options opts=', appService.options)
   if (typeof opts.logger === 'undefined') {
     if (args.cmd) {
       opts.logger = {

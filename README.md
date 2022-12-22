@@ -180,6 +180,10 @@
     - models objection.js所维护的模型。
     - schemas 用于fastify验证的schema保存在这里。
     - assets: 静态资源源代码，会整个的拷贝到root目录下。根据后缀选择资源处理方式。
+    - gql: graphql的代码目录:
+      - types: 其中的文件,保存了graphql的类型定义.
+      - resolvers: 其中的文件,保存了resolver的定义.
+      - loaders: 其中的文件,保存了loader的定义.
     - root 静态资源web入口。不要直接向这里写入内容，这是编译之后存放客户端静态资源的地方。不保存在git中。
   - plugins 由fastify定义的目录，启动时会自动加载其中全部插件。(只在主项目中自动遍历，模块中需要手动遍历)
     - prodvest.js 引入pv-fastify。其它内置工作在pv-fastify中完成。
@@ -202,6 +206,7 @@
 
 # fastify扩展说明(decorate)
 
+- reqrela: require相对于主项目根目录下开始的包.例如`fastify.reqrela('src/libs/auth/local',__dirname)`
 - _ : [lodash对象](https://lodash.com/) : 被内建添加，不能移除。内部代码依赖lodash.
   - cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/crypto-random-string)。
   - glob: 扩展增加了[glob](https://www.npmjs.com/package/glob)。
@@ -349,7 +354,7 @@
   - issue: HashiCorp || 'local' : 默认为local,local当前只支持read方法，根据名称，从对应文件系统中获取。
   - conf: [node-vault配置项](https://github.com/nodevault/node-vault#init-and-unseal)。
 - [zinc](https://zincsearch.com/): 使用zinsearch执行全文检索。
-- keycloak： [keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)提供了keycloak,我们将keycloak-adapter实现为服务，默认热部署[bitnami/keycloak](https://hub.docker.com/r/bitnami/keycloak)。部署时采用pg中的keycloak数据库，数据库密码保存在postgres/kc.passwd。kc的超级用户(admin)密码保存在keycloak/admin.passwd;管理员(manage)密码保存在keycloak/manage.passwd中。默认创建app realm。keycloak返回的是[KcAdminClient](https://github.com/keycloak/keycloak-nodejs-admin-client)实例对象，已通过验证。并且[fastify-keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)已设置好。preValidation已监听。
+- keycloak： [keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)提供了keycloak,我们将keycloak-adapter实现为服务，默认热部署[bitnami/keycloak](https://hub.docker.com/r/bitnami/keycloak)。部署时采用pg中的keycloak数据库，数据库密码保存在postgres/kc.passwd。kc的超级用户(admin)密码保存在keycloak/admin.passwd;管理员(manage)密码保存在keycloak/manage.passwd中。默认创建app realm。keycloak返回的是[KcAdminClient](https://github.com/keycloak/keycloak-nodejs-admin-client)实例对象，已通过验证。并且[fastify-keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)已设置好。palidation已监听。
   - proxy: [string] 将keycloak映射到主站点的目录下,默认kc子目录。给出false禁用这一特性。如果是对象，则为[fastify-http-proxy配置](https://github.com/fastify/fastify-http-proxy#options)
   - conf: [服务器信息](https://github.com/keycloak/keycloak-nodejs-admin-client#usage)。
   - adapter: [fastify-keycloak-adapter](https://github.com/yubinTW/fastify-keycloak-adapter)的配置信息。如果未提供，所需realm为app,clientid为`fastify-server`(内部id保存在keycloak/server.id)。所需clientSecret保存在keycloak/server.cert。

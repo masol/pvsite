@@ -42,10 +42,19 @@ if (!fastiConf.ajv) {
 
 module.exports = fp(async function (fastify, opts) {
   // Place here your custom code!
+  // const resolver = {}
+  // const loader = {}
+  // const qpl = []
+  //
 
   // 在将shell移至库函数后，需要在主项目中import/require。这是一个临时解决方案。
   fastify.decorate('require', (pkgName) => {
     return require(pkgName)
+  })
+  // fastify.decorate('dirname', __dirname)
+  fastify.decorate('reqrela', (libPath, selfPath) => {
+    const fullLibpath = path.isAbsolute(libPath) ? libPath : path.join(__dirname, libPath)
+    return require(selfPath ? path.relative(selfPath, fullLibpath) : fullLibpath)
   })
   fastify.decorate('import', (pkgName) => {
     return import(pkgName)
@@ -89,6 +98,14 @@ module.exports = fp(async function (fastify, opts) {
     dir: path.join(__dirname, 'src/routes'),
     options: Object.assign({}, opts)
   })
+
+  const { soa, util } = fastify
+  await util.schema(path.join(__dirname, 'src', 'helper', 'schemas'))
+  const fsm = await soa.get('fsm')
+  console.log('fsm=', fsm)
+  await fsm.scan(path.join(__dirname, 'src', 'helper', 'fsms'))
+
+  // 开始加载mercurius
 }, { fastify: '4.x' })
 
 // console.log('fastiConf=', fastiConf)
