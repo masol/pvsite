@@ -51,7 +51,7 @@ module.exports = fp(async function (fastify, opts) {
   fastify.decorate('require', (pkgName) => {
     return require(pkgName)
   })
-  // fastify.decorate('dirname', __dirname)
+  fastify.decorate('dirname', __dirname)
   fastify.decorate('reqrela', (libPath, selfPath) => {
     const fullLibpath = path.isAbsolute(libPath) ? libPath : path.join(__dirname, libPath)
     return require(selfPath ? path.relative(selfPath, fullLibpath) : fullLibpath)
@@ -102,8 +102,12 @@ module.exports = fp(async function (fastify, opts) {
   const { soa, util } = fastify
   await util.schema(path.join(__dirname, 'src', 'helper', 'schemas'))
   const fsm = await soa.get('fsm')
-  console.log('fsm=', fsm)
+  // console.log('fsm=', fsm)
   await fsm.scan(path.join(__dirname, 'src', 'helper', 'fsms'))
+
+  const gql = await soa.get('gql')
+  await gql.scan()
+  await gql.start()
 
   // 开始加载mercurius
 }, { fastify: '4.x' })

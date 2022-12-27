@@ -5,7 +5,13 @@
     "accessKeyId": "AKID4yf7NRIzTkoepvrb6ORAXr6B3h6GG3e0",
     "secretAccessKey": "$vault:tengxunkey",
     "region": "ap-beijing",
+    "threshold": 40960,
     "endpoint": "munao-1313478131.cos.accelerate.myqcloud.com"
+  },
+  "$cdn":{
+    "type": "tencent",
+    "accessKeyId": "AKID4yf7NRIzTkoepvrb6ORAXr6B3h6GG3e0",
+    "secretAccessKey": "$vault:tengxunkey"
   },
   "$dns": {
     "$webass": [

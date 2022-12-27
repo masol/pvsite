@@ -28,6 +28,7 @@
   - [配置说明](#配置说明)
   - [服务列表](#服务列表)
     - [默认启用](#默认启用)
+    - [开发环境下默认启用(其它环境需配置后启用)](#开发环境下默认启用其它环境需配置后启用)
     - [默认关闭](#默认关闭)
 
 # 使用说明
@@ -213,6 +214,7 @@
 - $ : [promise-utils对象](https://github.com/blend/promise-utils)及[@supercharge/goodies](https://superchargejs.com/docs/3.x/goodies#using-goodie-methods) : 被内建支持，不能移除。内部代码依赖此库。一些优秀的promise工具库，例如[pify系列](https://github.com/sindresorhus/pify)未加入，如果需要，以普通库方式自行加载。
   - glob: [glob](https://www.npmjs.com/package/glob)的Promise版本。
 - s : [underscore.string](https://github.com/esamattis/underscore.string)。并在其下以名称空间的方式扩展了:
+  - clusterName: 当前服务所使用的clusterName,从active符号链接resolve得到.
   - v : [validator.js](https://github.com/validatorjs/validator.js)。这些validator同时以format方式加入了[fastify内建ajv instance](https://ajv.js.org/)。
 - error: [http oritend error](https://github.com/ShogunPanda/http-errors-enhanced)提供的异常函数，有按照[http status code](https://github.com/ShogunPanda/http-errors-enhanced/blob/main/src/errors.ts)的对应快捷异常类。
 - om: [https://objectmodel.js.org/]: 动态类型检查(ObjectModel)更契合面向行为的思路，因此不推荐typescript,flow等编译期类型检查编译器，推荐采用soa.om来执行运行期类型检查。
@@ -255,6 +257,20 @@
   - domain: 保存了允许的domain名称，多个以空格分割。只有请求指定的domain,才会得到响应。否则会抛出bad request异常。
   - conf: 保存[fastify启动配置](https://www.fastify.io/docs/latest/Reference/Server/#factory)。如果配置了http2或者空的https。则在config/active/fastify下加载https.crt或https.key。tools中提供了openssl的自签名命令行。http跳转一是借助DNS，二是借助[fastify-https-redirect](https://github.com/tomsvogel/fastify-https-redirect)。推荐使用DNS。
     - logger: logger的可配置项，参考[pino配置对象](https://github.com/pinojs/pino/blob/master/docs/api.md#options-object)。pv-fastify允许logger值为字符串，此时其指向了logger对象定义模块,空为'./logger.js',pino的log系列方法的message格式，采用%s,%d,%o占位方式，[参考其文档](https://github.com/pinojs/pino/blob/master/docs/api.md#message)。
+- gql: 定义了由[mercurius](https://mercurius.dev/#/)支持的graphql服务.
+  - conf: 参考[mercurius plugin-options](https://mercurius.dev/#/docs/api/options?id=plugin-options).
+  - logger: 参考[mercurius-logging配置项](https://github.com/Eomm/mercurius-logging#options)了解日志记录.设置为`{disabled: true}`以禁用日志.
+  - inst接口说明:
+    - scanTypes: 扫描目录.加载scema
+    - scanResolvers
+    - scanLoaders
+    - extendSchema: 接口同app.graphql.extendSchema
+    - defineResolvers(resolvers)
+    - defineLoaders
+    - 下面是内部数据,不要直接维护,随时可能关闭:
+    - schemas: Array<string>.
+    - resolvers: Object.
+    - loaders: Object.
 - env: 定义了运行环境信息(这是一个fsm对象，用于管理本节点状态，进而管理全系统状态)。返回env对象。
   - conf
     - name: [string] 运行环境人读名称。
@@ -275,8 +291,6 @@
   - conf: 定义了helment的配置项。默认内容参考[helmetjs](https://helmetjs.github.io/)
 - cors: 定义了cors设置。返回插件对象。
   - conf: 参考[cors-options](https://github.com/fastify/fastify-cors#options)
-- circuit-breaker: 返回插件对象。
-  - conf: 定义了断路器，通常由AI维护。参考[circuit-breaker options](https://github.com/fastify/fastify-circuit-breaker#options)
 - compress:
   - conf: 参考[压缩配置](https://github.com/fastify/fastify-compress#compress-options)。
 - accepts: [accepts](https://github.com/fastify/fastify-accepts) : 支持与客户端的格式协商。
@@ -340,8 +354,13 @@
       - headerSize: 81920   // For multipart forms, the max size of a multipart header
 - auth: 用于支持用户管理的模块。参考pv-auth的代码及文档。
 
-### 默认关闭
+### 开发环境下默认启用(其它环境需配置后启用)
+- swagger: 监测系统注册全部route,并产生swagger api文档.
+  - conf: 参考[fastify-swagger的配置项](https://github.com/fastify/fastify-swagger#register-options)
+- swaggerui: 根据swagger的结果创建ui界面,如果swagger被禁用,此模块无法启用.
+  - conf: 参考[swagger-ui的配置项](https://github.com/fastify/fastify-swagger-ui#options)
 
+### 默认关闭
 - rate-limit:
   - conf: 参考[限速配置](https://github.com/fastify/fastify-rate-limit#options)了解这里允许的内容。对全局或指定请求限速。
 - static:
@@ -369,3 +388,5 @@
 - [any-schema](https://github.com/fastify/any-schema-you-like)
   - path: 指定需要require的文件，暴露一个函数，调用之得到schemas数组。参考[any-schema使用](https://github.com/fastify/any-schema-you-like#usage)
   - conf: 预定义的schema，会与path中的schema合并。
+- circuit-breaker: 返回插件对象。(尚未修正:断路器与swagger插件冲突,启用swagger后.运行报错.)
+  - conf: 定义了断路器，通常由AI维护。参考[circuit-breaker options](https://github.com/fastify/fastify-circuit-breaker#options)

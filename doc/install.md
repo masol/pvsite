@@ -27,7 +27,7 @@
 
 &emsp;&emsp;区别是开发环境也能够运行自身的服务，提供测试等服务，当然通常这个服务只为开发者一个人提供的，例如它涉及一些安全性及其他各类考量会减少很多，而运行环境是为很多人提供服务的，运行环境中有一种特殊的环境，是测试型运行环境，毕竟开发环境和运行环境并不完全一致，有的时候开发环境没有问题，运行环境有问题，测试环境我们可以选择物理机也可以选择虚拟机，而虚拟机通常我们用vagrant来管理，可以创建多个虚拟机来模拟集群环境。
 
-![开发环境部署到运维环境](../image/bushuhuanjing.png)
+![开发环境部署到运维环境](../doc/image/bushuhuanjing.png)
 
 ## 开发环境
 &emsp;&emsp;开发环境是本机上运行起来的环境，他的目的是让你在本地能够更好的开发，他是协助你开发的，而不是协助你运行的，同时它的pipeline默认环境使用docker来安装它的依赖服务，开发环境默认一切都是拿IP访问的，如果需要域名支持修改本地host表，都是模拟环境，无需做正式运行环境申请工作，现阶段你只需要知道如何把开发环境装上，然后在开发环境下执行pipeline了，开发环境也可以称为自举环境，如果在开发环境修改代码，执行pipeline指定参数，就能够部署到项目中。
@@ -296,11 +296,11 @@
 
 4. 在pvsite文件下运行 `gulp status -t test3` 查看集群状态报告
    
-   ![集群状态报告](../image/test3.png)
+   ![集群状态报告](../doc/image/test3.png)
 
 5. 在pvsite文件下运行 `gulp deploy -t test3` 部署集群节点
 
-   ![部署集群节点](../image/gulpdeploy1.png)
+   ![部署集群节点](../doc/image/gulpdeploy1.png)
 
 
 ### Linux开发环境安装过程可能存在的报错信息
@@ -354,7 +354,7 @@ If it's at a non-standard location, specify the URL with the DOCKER_HOST environ
 
    64 位安装包下载地址 : http://nodejs.org/dist/v0.10.26/x64/node-v0.10.26-x64.msi
 
-   ![下载包](../image/node1.jpg)
+   ![下载包](../doc/image/node1.jpg)
 
    本文实例以 v0.10.26 版本为例，其他版本类似。
 
@@ -362,35 +362,35 @@ If it's at a non-standard location, specify the URL with the DOCKER_HOST environ
 
    步骤 1 : 双击下载后的安装包 node-v0.10.26-x86.msi，如下所示：
 
-   ![安装包](../image/node2.png)   
+   ![安装包](../doc/image/node2.png)   
 
    步骤 2 : 点击以上的Run(运行)，将出现如下界面：
 
-   ![安装包运行](../image/node3.png)   
+   ![安装包运行](../doc/image/node3.png)   
 
    步骤 3 : 勾选接受协议选项，点击 next（下一步） 按钮 :
 
-   ![安装包协议](../image/node4.png)
+   ![安装包协议](../doc/image/node4.png)
 
    步骤 4 : Node.js默认安装目录为 "C:\Program Files\nodejs\" , 你可以修改目录，并点击 next（下一步）：
 
-   ![安装目录](../image/node5.png)
+   ![安装目录](../doc/image/node5.png)
 
    步骤 5 : 点击树形图标来选择你需要的安装模式 , 然后点击 next 进入下一步
 
-   ![安装模式](../image/node6.png)
+   ![安装模式](../doc/image/node6.png)
 
    步骤 6 :点击 Install（安装） 开始安装Node.js。你也可以点击 Back（返回）来修改先前的配置。 然后并点击 next进入下一步：
 
-   ![安装模式](../image/node7.png)
+   ![安装模式](../doc/image/node7.png)
 
    安装过程：
 
-   ![安装模式](../image/node8.png)
+   ![安装模式](../doc/image/node8.png)
 
    点击 Finish（完成）按钮退出安装向导。
 
-   ![安装模式](../image/node9.png)
+   ![安装模式](../doc/image/node9.png)
 
    检测PATH环境变量是否配置了Node.js，点击开始=》运行=》输入"cmd" => 输入命令"path"，输出如下结果：
 
@@ -405,7 +405,7 @@ If it's at a non-standard location, specify the URL with the DOCKER_HOST environ
 
    检查Node.js版本
 
-   ![安装模式](../image/node10.png)
+   ![安装模式](../doc/image/node10.png)
 
    切换npm源为国内源 `npm config set registry https://registry.npmmirror.com`
 
@@ -421,7 +421,7 @@ If it's at a non-standard location, specify the URL with the DOCKER_HOST environ
 
    安装包下载地址：https://www.docker.com/
 
-   ![安装docker](../image/docker1.png)
+   ![安装docker](../doc/image/docker1.png)
 
 
 7. 安装 `WSL2 Linux 内核更新包`
