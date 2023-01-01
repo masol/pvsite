@@ -16,7 +16,6 @@ async function setup (fastify) {
   return {
     Query: {
       me: (parent, args, ctx, arg4) => {
-        // console.log('arg4=', arg4)
         return ctx.request.isAuthenticated() ? _.clone(ctx.request.user) : {}
       }
     },

@@ -52,9 +52,9 @@ module.exports = fp(async function (fastify, opts) {
     return require(pkgName)
   })
   fastify.decorate('dirname', __dirname)
-  fastify.decorate('reqrela', (libPath, selfPath) => {
+  fastify.decorate('reqbase', (libPath) => {
     const fullLibpath = path.isAbsolute(libPath) ? libPath : path.join(__dirname, libPath)
-    return require(selfPath ? path.relative(selfPath, fullLibpath) : fullLibpath)
+    return require(fullLibpath)
   })
   fastify.decorate('import', (pkgName) => {
     return import(pkgName)

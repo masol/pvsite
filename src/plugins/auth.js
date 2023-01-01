@@ -19,12 +19,13 @@ module.exports = fp(async function (fastify, opts = {}) {
   await soa.get('knex')
   await util.model(path.join(fastify.dirname, 'src', 'helper', 'models'))
   if (_.isObject(fastify.runcmd)) { // runcmd mode.
-    return await fastify.reqrela('src/cmds/auth', __dirname).run(fastify, opts)
+    return await fastify.reqbase('src/cmds/auth').run(fastify, opts)
+    // return await require('../cmds/auth').run(fastify, opts)
   } else {
     const passport = await soa.get('passport')
     const strategies = cfgutil.has('passport.strategies') ? cfgutil.get('passport.strategies') : {}
     // 注册local验证。
-    await fastify.reqrela('src/libs/auth/local')(fastify, passport, strategies.local || {})
+    await fastify.reqbase('src/libs/auth/local')(fastify, passport, strategies.local || {})
     // @TODO: 如果是dev模式，注册静态地址。
     // if (cfgutil.isDev()) {
     // }

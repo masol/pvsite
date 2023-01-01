@@ -207,7 +207,7 @@
 
 # fastify扩展说明(decorate)
 
-- reqrela: require相对于主项目根目录下开始的包.例如`fastify.reqrela('src/libs/auth/local',__dirname)`
+- reqbase: require相对于主项目根目录下开始的包.例如`fastify.reqbase('src/libs/auth/local',__dirname)`
 - _ : [lodash对象](https://lodash.com/) : 被内建添加，不能移除。内部代码依赖lodash.
   - cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/crypto-random-string)。
   - glob: 扩展增加了[glob](https://www.npmjs.com/package/glob)。
