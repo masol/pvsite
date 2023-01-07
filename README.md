@@ -308,9 +308,9 @@
     - password: 随机创建16位密码， 保存在config/active/postgres/app.passwd中。其中还保存kc.passwd是为keycloak提供的数据库及用户。由于AI不能调整基础环境(基础环境以adapter的方式提供多个)，为灵活起见，不再深度绑定keycloak，而是采用passport。如果需要集成keycloak这样的sso,暴露LDAP接口做为kc的provider来集成。
 - [objection](https://vincit.github.io/objection.js/)。基于knex的ORM。需要自行录入和维护Model.扩展增加了`store`成员以保存系统有效的Model类。
 - corsess: 自行实现的不依赖cookie,采用jwt的session.参考了[@fastify/session](https://github.com/fastify/session)的代码.除了onSend hook,不注册hook,使用前需要soa.get('corsess'),然后调用API:
-  - APIP:
+  - API:
     - ensure(bForce = false):void  如果无法加载sess,则创建一个新的sess,如果检查到token,但是token不合法,或者没有传入VID,如果bForce为false,则抛出异常.(VID为了防止xsrf攻击)
-    - corsess.token():string|null 获取当前session的token.并不会设置进入cookie,需要调用者传递给客户端.
+    - token(): string|null 获取当前session的token.并不会设置进入cookie,需要调用者传递给客户端.如未初始化,会自动调用ensure(false).
     预订在preHandle中调用:
     - async auth(req,res): 确保用户已登录,否则抛出异常
     - getAcl(roleName,op,resourceName):(req,res)=>Promise  基于[accesscontrol](https://github.com/onury/accesscontrol)实现)
