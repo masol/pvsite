@@ -315,7 +315,7 @@
     - async chkAuth(req,res): 确保用户已登录,否则抛出异常
     - acl(roleName,op,resourceName):(req,res)=>Promise  基于[accesscontrol](https://github.com/onury/accesscontrol)实现)(尚未实现,貌似也不需要,有roleAcl就应该足够)
     - roleAcl(string|array<string>,opOR = true)(req,res)=>Promise  确保用户已登录,并且拥有指定角色集
-  - conf: 配置项,其配置内容借鉴了[@fastify/jwt](https://github.com/fastify/fastify-jwt).
+  - conf: 配置项,其配置内容参考[@fastify/jwt](https://github.com/fastify/fastify-jwt#usage),额外加上其它几个配置项:
 
 ### 开发环境下默认启用(其它环境需配置后启用)
 - swagger: 监测系统注册全部route,并产生swagger api文档.
