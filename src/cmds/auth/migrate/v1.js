@@ -53,7 +53,25 @@ module.exports = function (fastify, opts) {
           table.string('idcard', 64).unique().nullable()
           // 身份证号已验证(身份证验证)
           table.boolean('idcardVerified').defaultTo(false)
-          // 是否激活,多重验证中间状态，处于非激活状态。
+          // oauth uuid slot 1
+          table.string('exa1', 64).unique().nullable()
+          // oauth uuid slot 2
+          table.string('exa2', 64).unique().nullable()
+          // oauth uuid slot 3
+          table.string('exa3', 64).unique().nullable()
+          // oauth uuid slot 4
+          table.string('exa4', 64).unique().nullable()
+          // oauth uuid slot 5
+          table.string('exa5', 64).unique().nullable()
+          // oauth uuid slot 6
+          table.string('exa6', 64).unique().nullable()
+          // oauth uuid slot 7
+          table.string('exa7', 64).unique().nullable()
+          // oauth uuid slot 8
+          table.string('exa8', 64).unique().nullable()
+          // oauth uuid slot 9
+          table.string('exa9', 64).unique().nullable()
+          // 是否激活,多重验证中间状态，或者管理员临时禁用用户。
           table.boolean('active').defaultTo(false)
           // 创建日期。
           table.timestamp('created').notNullable().defaultTo(knex.fn.now())

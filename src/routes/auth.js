@@ -97,8 +97,9 @@ module.exports = async function (fastify, opts) {
           // request.session.regenerate()
           // console.log('request.session=', request.session)
         }
-        return ret
+        return { data: ret }
       }
+      return { error: 'unAuthenticated' }
       // return {}
       // return {
       //   ok: false

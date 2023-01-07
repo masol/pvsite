@@ -271,7 +271,7 @@
     - schemas: Array<string>.
     - resolvers: Object.
     - loaders: Object.
-- env: 定义了运行环境信息(这是一个fsm对象，用于管理本节点状态，进而管理全系统状态)。返回env对象。
+- env: 定义了运行环境的框架信息。返回env对象。
   - conf
     - name: [string] 运行环境人读名称。
     - mname: [string] 运行环境机读名称——此名称也是保存配置的目录名称。
@@ -281,12 +281,11 @@
     下面设置的服务，会在启动时加载。可以取代disable/enable配置方式，更集中。注意:enable/disable优先级高于这里的配置。
     - index: [string] 采用的全文索引库，设置为false以禁用全文检索。默认为elastic
     - db: [string] 采用的database,设置为false以禁用database support。默认为knex(默认postgresql,远程需要外部配置)
-    - share: [string] 采用的快速ipc共享(通常也被用做缓冲),设置为false以禁用ipc。默认为redis。
-    - oss: [string] 采用的对象存储，默认为'oss'。设置为local禁用之。webass与webapi分别为独立服务。本地部署的s3兼容服务器采用[zenko](https://www.zenko.io/)。如果使用[localstack](https://github.com/localstack/localstack)，需自行配置pipeline。
-    - vault: [string] 采用的敏感信息存储服务，默认为false(密码信息保存在config目录下的文件系统中)，可选vault。
-    - sso: [string] 采用的单点登录服务(Single-Sign-On)。可选keycloak,casdoor,authelia,zitadel。默认为passort。虽然passport不是一个sso server，但可以实现并模拟出sso效果。
-    - bidco: [string] 采用的双向通信(bidirectional communication)。默认为false。可以设置为[socketio](https://socket.io/)。默认使用redis adapter。
-    - static: [string] 静态资源存储服务，设置为false以禁用静态资源服务。默认为local。
+    - kv: [string] 采用的key-value数据库(通常也被用做缓冲或共享),设置为false以禁用。默认为redis。
+    - res: [string] 存储资源的对象存储(要求支持signed url)，默认为'webapi'。设置为false禁用之。这不是webass存储服务,而是资源存储,只不过与webass一样,可以是oss(webass本地可以是nginx等任意静态web server)。本地部署的s3兼容服务器采用[zenko](https://www.zenko.io/)。如果使用[localstack](https://github.com/localstack/localstack)，需自行配置pipeline。webapi的实现基于[express-fileupload](https://github.com/richardgirges/express-fileupload)实现的signed url uploader.
+    - vault: [string] 采用的敏感信息存储服务，默认为false(密码信息保存在config目录下的文件系统中)，设置为false以禁用vault服务.默认值"vault"。
+    - sso: [string] 单点登录服务(Single-Sign-On)框架。目前支持passport及corsess(默认)。corsess不依赖cookie及session,依赖fastify/jwt,提供了session,但是需要访问者提供header:VID(visitId)及AUTHORIZATION(bearer XXX).
+    - push: [string] 采用的双向通信(bidirectional communication)。默认为false。可以设置为[socketio](https://socket.io/)。默认使用redis adapter。
 - helmet: 定义了[fastify-helmet](https://github.com/fastify/fastify-helmet)的配置。
   - conf: 定义了helment的配置项。默认内容参考[helmetjs](https://helmetjs.github.io/)
 - cors: 定义了cors设置。返回插件对象。
@@ -295,16 +294,11 @@
   - conf: 参考[压缩配置](https://github.com/fastify/fastify-compress#compress-options)。
 - accepts: [accepts](https://github.com/fastify/fastify-accepts) : 支持与客户端的格式协商。
 - knex-utils: 增加包[knext-utils](https://github.com/knex/knex-utils)用于检查连接(heartbeat)等动作。
-- cookie: [fastify-cookie](https://github.com/fastify/fastify-cookie),提供了cookie支持。启用是因为被session依赖。
-  - conf: [有效的配置](https://github.com/fastify/fastify-cookie#options)
-- session: [fastify-session](https://github.com/fastify/session)，如果未配置store，根据env中的share来决定。
-  - conf: [有效配置](https://github.com/fastify/session#options)。
-    - store: 默认store采用了[connect-redis](https://github.com/tj/connect-redis)。因此store中的配置项依赖connect-redis。
 - elastic:
   - conf: [elastic配置](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-configuration.html)。如果使用docker,通常桌面版的max_map_count不足，临时修改的指令:`sudo sysctl -w vm.max_map_count=262144`。长期生效，修改文件`/etc/sysctl.conf`，在其中添加`vm.max_map_count=262144`。本地环境下默认开启。
 - [redis](https://redis.io/): redis兼容的内存数据库，本地环境下强制开启。
   - package: 采用的库，默认是[`ioredis`](https://github.com/luin/ioredis),设置为`redis`，则加载[node-redis](https://github.com/redis/node-redis)，两者配置略有不同。
-  - conf: [node-redis配置](https://github.com/redis/node-redis/blob/master/docs/client-configuration.md)。[ioredis配置](https://github.com/luin/ioredis#connect-to-redis)。
+  - conf: (https://github.com/luin/ioredis#connect-to-redis)。[node-redis配置](https://github.com/redis/node-redis/blob/master/docs/client-configuration.md)。
 - [knex](https://knexjs.org/): 默认采用knex访问数据库。如果未部署数据库，默认采用[bitnami/postgresql](https://hub.docker.com/r/bitnami/postgresql)，数据存放在docker volumes:pv_postgresql_data。
   - conf: 参考[knex configuration](https://knexjs.org/guide/#configuration-options)。只有在未定义client的时候，才会触发自动部署，自动部署会忽略keycloak的配置，按照默认部署，默认部署的信息如下:
     - host: 127.0.0.1
@@ -313,6 +307,14 @@
     - database: app
     - password: 随机创建16位密码， 保存在config/active/postgres/app.passwd中。其中还保存kc.passwd是为keycloak提供的数据库及用户。由于AI不能调整基础环境(基础环境以adapter的方式提供多个)，为灵活起见，不再深度绑定keycloak，而是采用passport。如果需要集成keycloak这样的sso,暴露LDAP接口做为kc的provider来集成。
 - [objection](https://vincit.github.io/objection.js/)。基于knex的ORM。需要自行录入和维护Model.扩展增加了`store`成员以保存系统有效的Model类。
+
+### 开发环境下默认启用(其它环境需配置后启用)
+- swagger: 监测系统注册全部route,并产生swagger api文档.
+  - conf: 参考[fastify-swagger的配置项](https://github.com/fastify/fastify-swagger#register-options)
+- swaggerui: 根据swagger的结果创建ui界面,如果swagger被禁用,此模块无法启用.
+  - conf: 参考[swagger-ui的配置项](https://github.com/fastify/fastify-swagger-ui#options)
+
+### 默认关闭
 - [passport](https://www.passportjs.org/): passport登录支持。采用[fastify-passport](https://github.com/fastify/fastify-passport),并内建支持了一些Strategy，可以直接配置使用。
   - strategies passport的策略配置。
     - local prodvest实现的local配置。
@@ -352,15 +354,11 @@
       - parts: Infinity,  // For multipart forms, the max number of parts (fields + files).
       - headerPairs: 2000   // Max number of header key=>value pairs
       - headerSize: 81920   // For multipart forms, the max size of a multipart header
-- auth: 用于支持用户管理的模块。参考pv-auth的代码及文档。
-
-### 开发环境下默认启用(其它环境需配置后启用)
-- swagger: 监测系统注册全部route,并产生swagger api文档.
-  - conf: 参考[fastify-swagger的配置项](https://github.com/fastify/fastify-swagger#register-options)
-- swaggerui: 根据swagger的结果创建ui界面,如果swagger被禁用,此模块无法启用.
-  - conf: 参考[swagger-ui的配置项](https://github.com/fastify/fastify-swagger-ui#options)
-
-### 默认关闭
+- cookie: [fastify-cookie](https://github.com/fastify/fastify-cookie),提供了cookie支持。启用是因为被session依赖。
+  - conf: [有效的配置](https://github.com/fastify/fastify-cookie#options)
+- session: [fastify-session](https://github.com/fastify/session)，如果未配置store，根据env中的share来决定。
+  - conf: [有效配置](https://github.com/fastify/session#options)。
+    - store: 默认store采用了[connect-redis](https://github.com/tj/connect-redis)。因此store中的配置项依赖connect-redis。
 - rate-limit:
   - conf: 参考[限速配置](https://github.com/fastify/fastify-rate-limit#options)了解这里允许的内容。对全局或指定请求限速。
 - static:
