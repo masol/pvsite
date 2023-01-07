@@ -312,9 +312,9 @@
     - ensure(bForce = false):void  如果无法加载sess,则创建一个新的sess,如果检查到token,但是token不合法,或者没有传入VID,如果bForce为false,则抛出异常.(VID为了防止xsrf攻击)
     - token(): string|null 获取当前session的token.并不会设置进入cookie,需要调用者传递给客户端.如未初始化,会自动调用ensure(false).
     预订在preHandle中调用:
-    - async auth(req,res): 确保用户已登录,否则抛出异常
-    - getAcl(roleName,op,resourceName):(req,res)=>Promise  基于[accesscontrol](https://github.com/onury/accesscontrol)实现)
-    - getRoles(string|array<string>,opOR = true)(req,res)=>Promise  确保用户已登录,并且拥有指定角色集
+    - async chkAuth(req,res): 确保用户已登录,否则抛出异常
+    - acl(roleName,op,resourceName):(req,res)=>Promise  基于[accesscontrol](https://github.com/onury/accesscontrol)实现)(尚未实现,貌似也不需要,有roleAcl就应该足够)
+    - roleAcl(string|array<string>,opOR = true)(req,res)=>Promise  确保用户已登录,并且拥有指定角色集
   - conf: 配置项,其配置内容借鉴了[@fastify/jwt](https://github.com/fastify/fastify-jwt).
 
 ### 开发环境下默认启用(其它环境需配置后启用)
