@@ -99,7 +99,7 @@ module.exports = async function (fastify, opts) {
         }
         return { data: ret }
       }
-      return { error: 'unAuthenticated' }
+      // return { error: 'unAuthenticated' }
       // return {}
       // return {
       //   ok: false
