@@ -24,7 +24,7 @@ module.exports = fp(async function (fastify, opts = {}) {
   } else {
     const passport = await soa.get('passport')
     const strategies = cfgutil.has('passport.strategies') ? cfgutil.get('passport.strategies') : {}
-    // 注册local验证。
+    // // 注册local验证。
     await fastify.reqbase('src/libs/auth/local')(fastify, passport, strategies.local || {})
     // @TODO: 如果是dev模式，注册静态地址。
     // if (cfgutil.isDev()) {

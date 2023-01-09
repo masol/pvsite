@@ -28,48 +28,49 @@ module.exports.setup = async function (fastify, ojs) {
     }
 
     /**
-     *
+     * @deprecated: 不再支持通过session来记录．而是通过push来跟踪当前登录用户．
      * @param {} param0
      * @returns 清理的session记录数。
      */
-    static async rmLogin ({ uid, loginDev, sessionStore }) {
-      const rmSess = async (sid) => {
-        return new Promise((resolve, reject) => {
-          sessionStore.destroy(sid, (err) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve()
-            }
-          })
-        })
-      }
-      const otherDevs = await Audit.query()
-        .where('uid', uid)
-        .where('action', 'login')
-        .whereNotNull('sid')
-        .orderBy('time', 'desc')
-        // otherDev.length+1是当前设备数，因当前登录尚未加入audit.
-      if (otherDevs.length >= loginDev) {
-        const startIdx = otherDevs.length - loginDev
-        const tasks = []
-        for (let i = startIdx; i < otherDevs.length; i++) {
-          const entry = otherDevs[i]
-          tasks.push(rmSess(entry.sid))
-        }
-        await Promise.all(tasks)
+    // static async rmLogin ({ uid, loginDev, sessionStore }) {
+    //   const rmSess = async (sid) => {
+    //     return new Promise((resolve, reject) => {
+    //       sessionStore.destroy(sid, (err) => {
+    //         if (err) {
+    //           reject(err)
+    //         } else {
+    //           resolve()
+    //         }
+    //       })
+    //     })
+    //   }
+    //   const otherDevs = await Audit.query()
+    //     .where('uid', uid)
+    //     .where('action', 'login')
+    //     .whereNotNull('sid')
+    //     .orderBy('time', 'desc')
+    //     // otherDev.length+1是当前设备数，因当前登录尚未加入audit.
+    //   console.log('otherDevs=', otherDevs)
+    //   if (otherDevs.length >= loginDev) {
+    //     const startIdx = otherDevs.length - loginDev
+    //     const tasks = []
+    //     for (let i = startIdx; i < otherDevs.length; i++) {
+    //       const entry = otherDevs[i]
+    //       tasks.push(rmSess(entry.sid))
+    //     }
+    //     await Promise.all(tasks)
 
-        await Audit.query()
-          .patch({ sid: null })
-          .where('uid', uid)
-          .where('action', 'login')
-          .whereNotNull('sid')
-          .orderBy('time', 'asc')
-          .limit(otherDevs.length - loginDev + 1)
-        return otherDevs.length - loginDev + 1
-      }
-      return 0
-    }
+    //     await Audit.query()
+    //       .patch({ sid: null })
+    //       .where('uid', uid)
+    //       .where('action', 'login')
+    //       .whereNotNull('sid')
+    //       .orderBy('time', 'asc')
+    //       .limit(otherDevs.length - loginDev + 1)
+    //     return otherDevs.length - loginDev + 1
+    //   }
+    //   return 0
+    // }
   }
   // console.log('ojs', ojs)
   ojs.Model.store[TABLENAME] = Audit

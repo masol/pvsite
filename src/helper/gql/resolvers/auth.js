@@ -11,7 +11,7 @@
 
 async function setup (fastify) {
   const { _, error, soa, log } = fastify
-  const passport = await soa.get('passport')
+  // const passport = await soa.get('passport')
   // const cfgutil = config.util
   return {
     Query: {
@@ -22,12 +22,12 @@ async function setup (fastify) {
     Mutation: {
       login: async (parent, args, ctx, info) => {
         console.log('enter login!')
-        const { request, reply } = ctx
+        const { request } = ctx
         if (request.isAuthenticated()) {
           throw new error.PreconditionRequiredError('Already logined')
         }
-        const Handler = await passport.authenticate('local')
-        await Handler(request, reply)
+        // const Handler = await passport.authenticate('local')
+        // await Handler(request, reply)
 
         log.error('12322')
         if (request.isAuthenticated()) {

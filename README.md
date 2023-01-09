@@ -27,6 +27,7 @@
 - [服务与配置](#服务与配置)
   - [配置说明](#配置说明)
   - [服务列表](#服务列表)
+    - [伪服务](#伪服务)
     - [默认启用](#默认启用)
     - [开发环境下默认启用(其它环境需配置后启用)](#开发环境下默认启用其它环境需配置后启用)
     - [默认关闭](#默认关闭)
@@ -150,7 +151,8 @@
   - :sweat_drops: envs.json 一个数组，定义了全部运行环境，方便admin快速处理，无需从目录中重构。local为本地。
   - active 符号链接，链接到当前有效的运行环境。
   - dev 开发运行环境：应用，数据库等配置信息。(下方目录都是默认值，如果更改配置文件，下方内容可能失效)
-    - default.json 默认项目服务定义文件。
+    - default.json 默认项目服务定义文件。通常此文件是由系统自动生成的.
+    - :sweat_drops: *local.json* 可选: 人工配置的定义文件,其项会覆盖default.json中的内容.
     - :sweat_drops: *production.json* 可选: 产品环境下的覆盖项。
     - :sweat_drops: *development* 可选: 开发环境下的覆盖项。
     - postgres: postgres的本地目录。数据映射到docker的`local_pv_postgresql_data`中。
@@ -160,22 +162,13 @@
       - admin.passwd: 内容保存了admin用户的密码，超级用户。
       - manage.passwd: 内容保存了manage用的密码，管理员用户。
     - redis: redis的本地目录。
-      - volumes: 存放redis stack server的数据。
-        - data: 映射到redis的/data，以存放数据。
+      - password: 如果redis需要密码,这里保存了密码.
     - elastic: elastic的本地目录
       - http_ca.crt: tls所需的证书。本地启动时自动从docer中获取。
       - passwd: elastic用户的密码，本地启动自动调用reset来获取最新。
-      - volumes: 存放elastic的数据.
-        - data: elastic的数据。
-        - logs: elastic的日志。
     - vault vault的本地目录.
       - root.key 如果自动初始化,则这里保存了root key.用于vault解封.
       - root.token 如果自动初始化,保存了root token.用于后续免登录访问vault.
-      - volumes: 映射到docker容器的host目录.
-        - config 配置目录
-          - vault.json vault启动配置.
-        - file 本地存储.由vault维护.
-        - logs 日志目录,由vault维护.
 - src: 使用[npm init fastify](https://www.npmjs.com/package/create-fastify)创建的资源，被挪到此目录。
   - helper: 将辅助说明类代码放入这里。
     - models objection.js所维护的模型。
@@ -251,6 +244,16 @@
 
 ## 服务列表
 
+### 伪服务
+  伪服务并不提供实现.只是简单过滤.目前用于为应用提供自定义的配置.
+- util: 预约名称.
+- $app: 目前已经使用的内部配置名称:
+  - audit 审计支持，会记录用户每次登录，修改密码的信息。
+    - disabled 禁用审计。默认是false
+    - max 保存的审计记录。默认是0,不限制。(TODO: 放在每日任务中执行)
+    - maxTime 最长的审计记录。默认是0，不限制。值为天数。(TODO: 放在每日任务中执行)
+
+
 ### 默认启用
 
 - fastify: 返回fastify对象。
@@ -307,15 +310,23 @@
     - database: app
     - password: 随机创建16位密码， 保存在config/active/postgres/app.passwd中。其中还保存kc.passwd是为keycloak提供的数据库及用户。由于AI不能调整基础环境(基础环境以adapter的方式提供多个)，为灵活起见，不再深度绑定keycloak，而是采用passport。如果需要集成keycloak这样的sso,暴露LDAP接口做为kc的provider来集成。
 - [objection](https://vincit.github.io/objection.js/)。基于knex的ORM。需要自行录入和维护Model.扩展增加了`store`成员以保存系统有效的Model类。
-- corsess: 自行实现的不依赖cookie,采用jwt的session.参考了[@fastify/session](https://github.com/fastify/session)的代码.除了onSend hook,不注册hook,使用前需要soa.get('corsess'),然后调用API:
-  - API:
-    - ensure(bForce = false):void  如果无法加载sess,则创建一个新的sess,如果检查到token,但是token不合法,或者没有传入VID,如果bForce为false,则抛出异常.(VID为了防止xsrf攻击)
-    - token(): string|null 获取当前session的token.并不会设置进入cookie,需要调用者传递给客户端.如未初始化,会自动调用ensure(false).
+- corsess: 自行实现的不依赖cookie,采用jwt的session.参考了[@fastify/session](https://github.com/fastify/session)的代码.为了保持兼容，采用相似接口，并在onRquest时构建session,在onSend时检查更新(并设置set-token header):
+  - API(内部使用，请直接使用request.session) :
+    - verify(request):void 检查request的jwt token．并加载对应的session.如果jwt任意异常，则抛出异常．
+    - ensure(request):void  如果无法加载sess,则创建一个新的sess,如果检查到token,但是token不合法，会新建token.
+    - token(request,replay,ttl=1day): string|null 刷新当前session的token(主要是刷新ttl).返回结果需要调用者传递给客户端.如未初始化,会自动调用ensure(false).如果reply不为空，会设置set-token header.
     预订在preHandle中调用:
     - async chkAuth(req,res): 确保用户已登录,否则抛出异常
-    - acl(roleName,op,resourceName):(req,res)=>Promise  基于[accesscontrol](https://github.com/onury/accesscontrol)实现)(尚未实现,貌似也不需要,有roleAcl就应该足够)
-    - roleAcl(string|array<string>,opOR = true)(req,res)=>Promise  确保用户已登录,并且拥有指定角色集
-  - conf: 配置项,其配置内容参考[@fastify/jwt](https://github.com/fastify/fastify-jwt#usage),额外加上其它几个配置项:
+    - getAclChker(roleName,op,resourceName):(req,res)=>Promise  基于[accesscontrol](https://github.com/onury/accesscontrol)实现)(尚未实现,貌似也不需要,有roleAcl就应该足够)
+    - getRoleChker(string|array<string>,opOR = true)(req,res)=>Promise  确保用户已登录,并且拥有指定角色集
+  - conf: 配置项,其配置内容参考[@fastify/jwt](https://github.com/fastify/fastify-jwt#usage),默认不响应cookie,可以在配置添加cookie以响应和处理cookie．
+    下方几个配置项被内部重置，因此无效：
+    - decoratorName： 被强制设置为'session'
+    - formatUser: 内部用来管理session.
+    - trusted: 内部用来从store中获取session数据．
+  - session: 为session增加的配置项:
+    - ttl: session的持续时间.其格式为JSON Object,参考[moment add](https://momentjs.com/docs/#/manipulating/add/)．默认为{days: 1}，如果是数字，则为秒数．
+    - strict: 严格模式(默认关:false)．当处于严格模式下，如果调用者未提供vid header.则自动限制此token下次必须从相同ip访问,否则不提供vid时，创建的token无任何限制．
 
 ### 开发环境下默认启用(其它环境需配置后启用)
 - swagger: 监测系统注册全部route,并产生swagger api文档.
@@ -331,10 +342,6 @@
       - defaultName 无法获取显示名称时，给出默认的显示名称。
       - pwdRE 允许用户名密码登录的用户名正则。默认为'.*',全部允许。设置为''禁止用户名密码登录。
       - loginDev 允许同时登入的设备数。默认是0,不限制。数字表示允许的数量,超出数量按照MLR(暂未支持)
-  - audit 审计支持，会记录用户每次登录，修改密码的信息。
-    - disabled 禁用审计。默认是false
-    - max 保存的审计记录。默认是0,不限制。(TODO: 放在每日任务中执行)
-    - maxTime 最长的审计记录。默认是0，不限制。值为天数。(TODO: 放在每日任务中执行)
 - oss: 对象存储服务。
   - package: 默认为`aws-sdk`,表示采用s3兼容的oss。
   - conf 保存了aws-s3的`AWS.config.update`参数.
