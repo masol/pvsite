@@ -1,0 +1,14 @@
+type Query {
+  audits(limit: Int, offset: Int,suc: Boolean): [Audit]
+}
+
+type Audit {
+  action: String
+  suc: Boolean
+  time: String
+  uid: ID
+  username: String
+  password: String
+  ip: String
+  ipfs: [String]
+}
