@@ -111,7 +111,7 @@ module.exports = async function (fastify, opts) {
     async function (request, reply) {
       // console.log('before handler', request.body)
       if (!request.isAuthenticated()) {
-        throw new error.PreconditionRequiredError('not logined')
+        throw new error.UnauthorizedError('not logined')
       }
       const sid = request.session.meta().id
       const name = request.user.name

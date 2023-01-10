@@ -10,7 +10,7 @@
 // File: auth
 
 async function setup (fastify) {
-  const { _, error, soa, log } = fastify
+  const { _, error, log } = fastify
   // const passport = await soa.get('passport')
   // const cfgutil = config.util
   return {
@@ -43,8 +43,8 @@ async function setup (fastify) {
           //   // request.session.regenerate()
           //   // console.log('request.session=', request.session)
           // }
-          const session = soa.get('session')
-          await session.save()
+          // const session = soa.get('session')
+          // await session.save()
           return ret
         }
         console.log('arg1=', parent)
