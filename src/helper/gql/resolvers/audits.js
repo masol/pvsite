@@ -10,7 +10,7 @@
 // File: audits
 
 async function setup (fastify) {
-  const { _, soa } = fastify
+  const { soa } = fastify
   const ojs = await soa.get('objection')
   return {
     Query: {
@@ -20,26 +20,11 @@ async function setup (fastify) {
         // }
         const Audit = ojs.Model.store.audit
         console.log('Audits=', Audit)
-        let query = Audit.query().select('*')
-        console.log('query=', query)
-        if (_.isBoolean(args.suc)) {
-          query = query.where('suc', args.suc)
-          console.log('query suc=', query)
-        }
-        if (_.isNumber(args.limit)) {
-          query = query.limit(args.limit)
-          console.log('query limit=', query)
-        }
-        if (_.isNumber(args.offset)) {
-          query = query.offset(args.offset)
-        }
-        const result = await query
+        const result = await Audit.query().select('*').modify('demo', args)
         console.log('result=', result)
+        // result =  _.map(result, Audit.transform名称)
+        // result =  _.map(result, item=>{ return Audit.transform名称(额外参数)})
         return result
-
-        // console.log('parent=', parent)
-        // console.log('args=', args)
-        // console.log('arg4=', info)
       }
     }
   }

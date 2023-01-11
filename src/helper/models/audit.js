@@ -11,9 +11,28 @@
 
 const TABLENAME = 'audit'
 module.exports.setup = async function (fastify, ojs) {
+  const { _ } = fastify
   class Audit extends ojs.Model {
     static get tableName () {
       return TABLENAME
+    }
+
+    static get modifiers () {
+      return {
+        demo (builder, args = {}) {
+          if (_.isBoolean(args.suc)) {
+            builder = builder.where('suc', args.suc)
+            // console.log('query suc=', builder)
+          }
+          if (_.isNumber(args.limit)) {
+            builder = builder.limit(args.limit)
+            // console.log('query limit=', builder)
+          }
+          if (_.isNumber(args.offset)) {
+            builder = builder.offset(args.offset)
+          }
+        }
+      }
     }
 
     static async logout (sid, auditJSON) {
