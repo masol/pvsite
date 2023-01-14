@@ -67,7 +67,7 @@ async function runCmd (app, args) {
 }
 
 function start (app, args, opts) {
-  console.log('NODE_APP_INSTANCE=', process.env.NODE_APP_INSTANCE)
+  console.log('NODE_APP_INSTANCE=', process.env.INSTANCE_ID)
 
   // Require library to exit fastify process, gracefully (if possible)
   const closeWithGrace = require('close-with-grace')
@@ -89,11 +89,11 @@ function start (app, args, opts) {
   const cluster = require('cluster')
   if (args.cluster && cluster.isMaster) { // cluster模式
     doListen = false
-    const intId = setInterval(() => {
-      if (Object.keys(cluster.workers).length > 0) {
-        clearInterval(intId)
-      }
-    }, 100)
+    // const intId = setInterval(() => {
+    //   if (Object.keys(cluster.workers).length > 0) {
+    //     clearInterval(intId)
+    //   }
+    // }, 100)
     // cluster.on('exit', function (worker) {
     //   console.log('Worker', worker.id, ' has exited.')
     // })

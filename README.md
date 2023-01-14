@@ -258,7 +258,7 @@
 
 - fastify: 返回fastify对象。
   - domain: 保存了允许的domain名称，多个以空格分割。只有请求指定的domain,才会得到响应。否则会抛出bad request异常。
-  - conf: 保存[fastify启动配置](https://www.fastify.io/docs/latest/Reference/Server/#factory)。如果配置了http2或者空的https。则在config/active/fastify下加载https.crt或https.key。tools中提供了openssl的自签名命令行。http跳转一是借助DNS，二是借助[fastify-https-redirect](https://github.com/tomsvogel/fastify-https-redirect)。推荐使用DNS。
+  - conf: 保存[fastify启动配置](https://www.fastify.io/docs/latest/Reference/Server/#factory)。如果配置了http2(注意:当前websocket实现不支持http2,因此默认未开启http2)或者空的https。则在config/active/fastify下加载https.crt或https.key。tools中提供了openssl的自签名命令行。http跳转一是借助DNS，二是借助[fastify-https-redirect](https://github.com/tomsvogel/fastify-https-redirect)。推荐使用DNS。
     - logger: logger的可配置项，参考[pino配置对象](https://github.com/pinojs/pino/blob/master/docs/api.md#options-object)。pv-fastify允许logger值为字符串，此时其指向了logger对象定义模块,空为'./logger.js',pino的log系列方法的message格式，采用%s,%d,%o占位方式，[参考其文档](https://github.com/pinojs/pino/blob/master/docs/api.md#message)。
 - gql: 定义了由[mercurius](https://mercurius.dev/#/)支持的graphql服务.
   - conf: 参考[mercurius plugin-options](https://mercurius.dev/#/docs/api/options?id=plugin-options).
