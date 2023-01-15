@@ -67,49 +67,53 @@ module.exports = fp(async function (fastify, opts) {
   //   fastify.decorate('_', null)
   //   fastify.decorate('config', null)
   // })
+  const bRuncmd = fastify._.isObject(fastify.runcmd)
 
-  // 响应pm2的shutdown消息，清理环境，友好退出。
-  process.on('message', msg => {
-    if (msg === 'shutdown') {
-      fastify.close()
-    }
-  })
+  if (!bRuncmd) {
+    // 响应pm2的shutdown消息，清理环境，友好退出。
+    process.on('message', msg => {
+      if (msg === 'shutdown') {
+        fastify.close()
+      }
+    })
 
-  // if (usehttps) {
-  //   fastify.register(require('fastify-https-redirect'), {
-  //     httpPort: 1080,
-  //     httpsPort: 10443
-  //   })
-  // }
+    // if (usehttps) {
+    //   fastify.register(require('fastify-https-redirect'), {
+    //     httpPort: 1080,
+    //     httpsPort: 10443
+    //   })
+    // }
 
-  // Do not touch the following lines
+    // Do not touch the following lines
 
-  // This loads all plugins defined in plugins
-  // those should be support plugins that are reused
-  // through your application
-  await fastify.register(AutoLoad, {
-    dir: path.join(__dirname, 'src/plugins'),
-    options: Object.assign({}, opts)
-  })
+    // This loads all plugins defined in plugins
+    // those should be support plugins that are reused
+    // through your application
+    await fastify.register(AutoLoad, {
+      dir: path.join(__dirname, 'src/plugins'),
+      options: Object.assign({}, opts)
+    })
 
-  // This loads all plugins defined in routes
-  // define your routes in one of these
-  await fastify.register(AutoLoad, {
-    dir: path.join(__dirname, 'src/routes'),
-    options: Object.assign({}, opts)
-  })
+    // This loads all plugins defined in routes
+    // define your routes in one of these
+    await fastify.register(AutoLoad, {
+      dir: path.join(__dirname, 'src/routes'),
+      options: Object.assign({}, opts)
+    })
+  }
 
   const { soa, util } = fastify
-  await util.schema(path.join(__dirname, 'src', 'helper', 'schemas'))
+  await util.restSchema(path.join(__dirname, 'src', 'helper', 'schemas', 'rest'))
   const fsm = await soa.get('fsm')
   // console.log('fsm=', fsm)
   await fsm.scan(path.join(__dirname, 'src', 'helper', 'fsms'))
 
   const gql = await soa.get('gql')
   await gql.scan()
-  await gql.start()
-
-  // 开始加载mercurius
+  if (!bRuncmd) {
+    // 开始加载mercurius
+    await gql.start()
+  }
 }, { fastify: '4.x' })
 
 // console.log('fastiConf=', fastiConf)

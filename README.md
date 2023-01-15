@@ -172,17 +172,20 @@
 - src: 使用[npm init fastify](https://www.npmjs.com/package/create-fastify)创建的资源，被挪到此目录。
   - helper: 将辅助说明类代码放入这里。
     - models objection.js所维护的模型。
-    - schemas 用于fastify验证的schema保存在这里。
-    - assets: 静态资源源代码，会整个的拷贝到root目录下。根据后缀选择资源处理方式。
+    - schemas 保存了接口及数据库的schema.
+      - rest: 用于fastify验证的schema保存在这里。(for rest api)
+      - db: 用于数据库migrate的schema保存在这里,其内目录为版本号，版本号中的所有js文件，如果包含了up/down，被视作verop.会将版本号中的数字部分抽取，并排序．
+      - gql: gql的schema定义，虽然这里依然有效，但是一般会放在gql/schemas目录中．
     - gql: graphql的代码目录:
-      - types: 其中的文件,保存了graphql的类型定义.
+      - schemas: 其中的文件,保存了graphql的类型定义.
       - resolvers: 其中的文件,保存了resolver的定义.
       - loaders: 其中的文件,保存了loader的定义.
-    - root 静态资源web入口。不要直接向这里写入内容，这是编译之后存放客户端静态资源的地方。不保存在git中。
+    - libs: 由使用者自行维护的，不能归类到其它类别，但是需要复用的＂库代码＂，通常在plugins目录下引入的插件初始化代码中调用．
+    - fsms: 定义了系统内"复杂"状态的FSM，在提交数据时，通过FSM来辅助状态变迁并更新数据．通常只有状态数大于7才有可能使用．
   - plugins 由fastify定义的目录，启动时会自动加载其中全部插件。(只在主项目中自动遍历，模块中需要手动遍历)
     - prodvest.js 引入pv-fastify。其它内置工作在pv-fastify中完成。
   - routes 由fastify定义的目录，根据文件创建路由。(只在主项目中自动遍历，模块中需要手动遍历——可调用soa.util.route自动加入路由)
-  - cmds: 命令实现。
+  - cmds: 命令实现。其内每个模块视作一个同名的命令．执行时会被调用．在自定义的插件中无需考虑命令模式－－命令模式下不会加载本地插件．
 - test 测试文件存放目录。
 - pvdev 由编辑器维护的数据目录
   - project.json 定义了项目的基础信息。其中$webapi的目录是当前项目目录，$webass指定了静态资源目录(如未指定，则为当前目录加ui构成目录,和当前目录同级)。

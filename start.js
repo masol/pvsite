@@ -51,7 +51,11 @@ async function runCmd (app, args) {
   // 由于fastify-cli无法设置additionalOptions，改为监听random socks.see: https://github.com/fastify/fastify-cli/blob/c694d12aa14d53bad93da5541ff281e79e9f337f/start.js#L152
   app.decorate('runcmd', args)
 
-  app.ready()
+  await app.ready()
+
+  const { soa } = app
+  const cmds = await soa.get('cmds')
+  await cmds.run(args.cmd, args)
 
   // 命令模式，添加onReady hook,并等到opts的deps结束。
   // app.addHook('onReady', async function () {
@@ -157,7 +161,7 @@ function start (app, args, opts) {
   // Instantiate Fastify with some config
   const app = Fastify(opts)
 
-  app.register(appService, args)
+  await app.register(appService, args)
 
   if (args.cmd) {
     await runCmd(app, args)

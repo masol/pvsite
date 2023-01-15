@@ -12,6 +12,8 @@
 const fs = require('fs').promises
 const crypto = require('crypto')
 
+module.exports.dep = 'migrate'
+
 module.exports.run = async function (fastify, opts = {}) {
   const { soa, _, log, config } = fastify
   const cfgutil = config.util

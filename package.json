@@ -9,7 +9,7 @@
   "scripts": {
     "test": "tap \"test/**/*.test.js\"",
     "start": "fastify start -l info -o app.js",
-    "cmd": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-network-imports\" node start.js --cmd",
+    "cmd": "node start.js --cmd",
     "dev": "fastify start -w --ignoreWatch=\"config pvdev src/frontend\" -l debug -P -o app.js"
   },
   "keywords": [],
