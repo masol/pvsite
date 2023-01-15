@@ -55,6 +55,9 @@ async function runCmd (app, args) {
 
   const { soa } = app
   const cmds = await soa.get('cmds')
+  if (app.runcmd._ && app.runcmd._.length > 0) {
+    app.runcmd[app.runcmd._[0]] = true
+  }
   await cmds.run(args.cmd, args)
 
   // 命令模式，添加onReady hook,并等到opts的deps结束。

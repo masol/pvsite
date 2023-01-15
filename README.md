@@ -55,9 +55,8 @@
 
 ## web环境命令
 &emsp;&emsp;借鉴[drush](https://www.drush.org/latest/)的概念，提供了命令行`npm run cmd XXX -- --param=value`。命令行模式启用了[external imports](https://nodejs.org/api/esm.html#https-and-http-imports)。允许从网络加载代码。目前提供的命令如下:
-- user: 自动调用migrate之后，维护用户，支持如下参数:
-  - --init 创建admin用户，如果没有的话。这是默认选项。
-  - --passwd 修改admin用户密码.值为给定的值。
+- user: 自动调用migrate之后，维护用户，创建admin用户，如果没有的话。这是默认选项。额外支持如下参数:
+  --reset 将admin的密码重置为admin.passwd中的值，如果没有，创建默认密码，并保存到admin.passwd中．
 - pkg: 使用[pkg](https://github.com/vercel/pkg)生成编译发行版。
 - deploy: 部署运行环境。额外参数: part=XXXX,XXX
 - migrate: 维护数据库，默认全部。额外参数:-- --down --force --all 参考auth模块的文档。

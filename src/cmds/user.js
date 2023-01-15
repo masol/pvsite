@@ -15,7 +15,7 @@ const crypto = require('crypto')
 module.exports.dep = 'migrate'
 
 module.exports.run = async function (fastify, opts = {}) {
-  const { soa, _, log, config } = fastify
+  const { soa, _, log, config, runcmd } = fastify
   const cfgutil = config.util
   const ojs = await soa.get('objection')
   const Users = ojs.Model.store.users
@@ -29,8 +29,9 @@ module.exports.run = async function (fastify, opts = {}) {
     .select('id')
     .where('accountName', 'admin')
   // console.log('admin=', admin)
-  if (admin.length === 1) {
-    log.warn('用户admin已经存在，请使用passwd指令来修正密码')
+
+  if (admin.length === 1 && !runcmd.reset) {
+    log.warn('用户admin已经存在，请添加reset参数来重置密码')
     return false
   }
   const pwdFile = cfgutil.path('config', 'active', 'admin.passwd')
@@ -44,11 +45,20 @@ module.exports.run = async function (fastify, opts = {}) {
     await fs.writeFile(pwdFile, passwd)
   }
 
-  const result = await Users.query().insert({
-    accountName: 'admin',
-    password: crypto.createHash('md5').update(passwd).digest('hex'),
-    active: true
-  })
+  let result
+  if (admin.length > 0) {
+    result = await Users.query().update({
+      password: crypto.createHash('md5').update(passwd).digest('hex'),
+      active: true
+    }).where('accountName', 'admin')
+  } else {
+    result = await Users.query().insert({
+      accountName: 'admin',
+      password: crypto.createHash('md5').update(passwd).digest('hex'),
+      active: true
+    })
+  }
+  log.info(`用户admin创建完毕，密码文件:${pwdFile}`)
   // console.log('result=', result)
   return result
 }
