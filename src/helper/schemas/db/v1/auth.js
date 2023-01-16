@@ -74,7 +74,7 @@ module.exports = function (fastify, opts) {
           // 是否激活,多重验证中间状态，或者管理员临时禁用用户。
           table.boolean('active').defaultTo(false)
           // 创建日期。
-          table.timestamp('created').notNullable().defaultTo(knex.fn.now())
+          table.timestamp('createdAt').notNullable().defaultTo(knex.fn.now())
           // 创建人
           table.uuid('createdBy').nullable()
           // avatar(URL)
