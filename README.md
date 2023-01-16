@@ -18,6 +18,11 @@
     - [简介](#简介)
     - [Why SOA?](#why-soa)
     - [服务定义(SDL)](#服务定义sdl)
+  - [cors \&\& stateless](#cors--stateless)
+    - [cors session(corsession)](#cors-sessioncorsession)
+    - [stateless ws(corsws)](#stateless-wscorsws)
+    - [cors file server](#cors-file-server)
+    - [cors media server](#cors-media-server)
   - [运行环境](#运行环境)
     - [部署服务](#部署服务)
   - [缓冲说明](#缓冲说明)
@@ -56,10 +61,9 @@
 ## web环境命令
 &emsp;&emsp;借鉴[drush](https://www.drush.org/latest/)的概念，提供了命令行`npm run cmd XXX -- --param=value`。命令行模式启用了[external imports](https://nodejs.org/api/esm.html#https-and-http-imports)。允许从网络加载代码。目前提供的命令如下:
 - user: 自动调用migrate之后，维护用户，创建admin用户，如果没有的话。这是默认选项。额外支持如下参数:
-  --reset 将admin的密码重置为admin.passwd中的值，如果没有，创建默认密码，并保存到admin.passwd中．
-- pkg: 使用[pkg](https://github.com/vercel/pkg)生成编译发行版。
-- deploy: 部署运行环境。额外参数: part=XXXX,XXX
+  - reset 将admin的密码重置为admin.passwd中的值，如果没有，创建默认密码，并保存到admin.passwd中．
 - migrate: 维护数据库，默认全部。额外参数:-- --down --force --all 参考auth模块的文档。
+- pkg: 使用[pkg](https://github.com/vercel/pkg)生成编译发行版。(暂未支持，可能在pipeline中支持)
 
 ### web命令说明
 &emsp;&emsp;通过检查`fastify.runcmd`是否为真来判定是否处于命令模式下。命令模式有如下几个特点:
@@ -119,6 +123,28 @@
 - loader:object|string&emsp; 装载器配置。类似url,protocal部分为type,例如:`yarn://packagename#local-parameters`。默认的http/https假定装载的是一个es6 module.
   - type: 装载器类型:es6|npm|yarn
 
+## cors && stateless
+&emsp;&emsp;服务器默认为CORS环境，并且为stateless.包括服务器推(push),session,resource uploader,media server....
+
+### cors session(corsession)
+&emsp;&emsp;session支持了corsession服务．通过`authorization`(格式为`token`或者`Bearer token`)头来传递token信息．服务器会返回`set-token`来更新token．token中只包含了sessionId．
+
+&emsp;&emsp;除了cors配置．客户端可以提交vid(Visitor ID)．如果不提供，则验证IP．要求每个token配对的vid或ip必须一致．(默认未开启strict)
+
+### stateless ws(corsws)
+&emsp;&emsp;思路是服务器定义自己的资源ID，并在资源更新时，调用`corsws.emit()`来广播更新内容(diff),建立了通路的客户端会收到消息，并更新Vars中的tgtpath．
+
+&emsp;&emsp;为了建立通路，服务器可以通过`set-live`头(自动)或其它方式来返回(需手动建立通路)，在回应一个资源时，指明本资源是live更新的．live头的内容通过`corsws.liveId(topic,last)`来获取，格式为`last Token`．
+
+&emsp;&emsp;为了在断线时不丢失live信息，live分为抛弃版(`volatile`设为true)及普通版(默认).普通版会将每次的emit存入数据库，并获取到当前版本id(自增长).这一id作为last返回客户端．客户端每次得到通知，都会更新自己的last,在断线重链之，会得到断线期丢失的更新信息．last设置为-2表示`volatile`,意味着不获取任意缺失的更新．
+
+### cors file server
+&emsp;&emsp;用户上传数据的资源服务器，是独立的．将身份验证信息编码进入URL,客户端得到URL即可上传/下载私有文件．推荐使用aws兼容的oss服务．也支持一个简单的内建资源服务器．
+
+### cors media server
+&emsp;&emsp;直播，视频与资源数据的区别在于上传后的资源需要做处理．可以通过oss提供的处理服务，或者独立的media server来支持．apiserver也是通过对URL签名的方式鉴权．
+
+
 ## 运行环境
 
 &emsp;&emsp;通过pipeline，在本地环境时，提供了维护运行环境的能力。运行环境通过在`pvdev/cluster`目录中定义，并编译到config目录下，特定环境通过建立符号链接active来支持。在`pvdev/cluster/default.json`及`pvdev/cluster/{cluster name}/config/default.json`中添加[服务与配置](#服务与配置)。pipeline会将集群配置合并全局配置，然后将其更新至`config/{cluster name}/default.json`
@@ -136,9 +162,9 @@
 
 ## 缓冲说明
 
-&emsp;&emsp;服务器端的状态持久化，主要涉及缓冲机制。目前数据分为三层(前两层为缓冲)，内存层，网络内存层(redis)，数据库。内存层最节约内存的选择是集群友好的[memory map](https://www.npmjs.com/package/mmap-object)，默认使用了面向进程的[lru-cache](https://www.npmjs.com/package/lru-cache)。网络内存层选择redis，最后是数据层。
+&emsp;&emsp;服务器端的状态持久化，主要涉及缓冲机制。目前数据分为三层(前两层为缓冲)，内存层，网络内存层(redis)，数据库。内存层节约内存的选择是集群友好的[memory map](https://www.npmjs.com/package/mmap-object)，默认使用了面向进程的[lru-cache](https://www.npmjs.com/package/lru-cache)。网络内存层选择redis，最后是数据库层。
 
-&emsp;&emsp;缓冲服务不采用TTL机制，而是采用主动作废，通过redis的pub/sub机制来支持。当状态数据被更新时，发出缓冲作废的事件。注意：缓冲是一个依赖链，每次获取到缓冲对象，需要检查所有依赖状态时间戳，不满足时作废自身。
+&emsp;&emsp;缓冲服务不采用TTL机制，而是采用主动作废，通过redis的pub/sub机制来支持。当状态数据被更新时，发出缓冲作废的事件。注意：缓冲是一个依赖链，每次获取到缓冲对象，需要检查所有依赖状态时间戳，不满足时作废自身。(尚未实现)
 
 # 目录结构
 
@@ -312,6 +338,11 @@
     - database: app
     - password: 随机创建16位密码， 保存在config/active/postgres/app.passwd中。其中还保存kc.passwd是为keycloak提供的数据库及用户。由于AI不能调整基础环境(基础环境以adapter的方式提供多个)，为灵活起见，不再深度绑定keycloak，而是采用passport。如果需要集成keycloak这样的sso,暴露LDAP接口做为kc的provider来集成。
 - [objection](https://vincit.github.io/objection.js/)。基于knex的ORM。需要自行录入和维护Model.扩展增加了`store`成员以保存系统有效的Model类。
+- corsws: 自行实现的stateless websocket pusher.只负责建立通道．客户端通过jwt签名的topic来关注．因此，断线重连不会丢失消息,并且无需sticky.可以通过pipeline单独部署($websock)．此时需要确定两端通信握手的密钥/密码/可信IP．
+  - conf: [fastify/websocket](https://github.com/websockets/ws/blob/master/doc/ws.md#new-websocketserveroptions-callback)的配置参考其依赖的ws.常用如下：
+    - maxPayload 默认100MB.
+    - path 默认/corsws, 修改此配置会修改默认的监听路径．
+    - maxIdle 如果没有成功监听任意有效资源，最大允许的idle时间，超时会被强制关闭．默认0ms,意味着必须带有有效的authorization header(Live Token),否则会被关闭链接．
 - corsess: 自行实现的不依赖cookie,采用jwt的session.参考了[@fastify/session](https://github.com/fastify/session)的代码.为了保持兼容，采用相似接口，并在onRquest时构建session,在onSend时检查更新(并设置set-token header):
   - API(内部使用，请直接使用request.session) :
     - verify(request):void 检查request的jwt token．并加载对应的session.如果jwt任意异常，则抛出异常．
