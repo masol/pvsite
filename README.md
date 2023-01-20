@@ -235,6 +235,8 @@
 - _ : [lodash对象](https://lodash.com/) : 被内建添加，不能移除。内部代码依赖lodash.
   - cryptoRandom: 扩展增加了[cryptoRandomString函数](https://github.com/sindresorhus/crypto-random-string)。
   - glob: 扩展增加了[glob](https://www.npmjs.com/package/glob)。
+  - crc: [crc](https://www.npmjs.com/package/crc)计算
+  - simpleHash: 快速[hash计算](https://www.partow.net/programming/hashfunctions/index.html)．
 - $ : [promise-utils对象](https://github.com/blend/promise-utils)及[@supercharge/goodies](https://superchargejs.com/docs/3.x/goodies#using-goodie-methods) : 被内建支持，不能移除。内部代码依赖此库。一些优秀的promise工具库，例如[pify系列](https://github.com/sindresorhus/pify)未加入，如果需要，以普通库方式自行加载。
   - glob: [glob](https://www.npmjs.com/package/glob)的Promise版本。
 - s : [underscore.string](https://github.com/esamattis/underscore.string)。并在其下以名称空间的方式扩展了:

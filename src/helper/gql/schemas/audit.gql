@@ -3,6 +3,7 @@ type Query {
 }
 
 type Audit {
+  id: String
   action: String
   suc: Boolean
   time: String

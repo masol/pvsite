@@ -83,7 +83,21 @@ module.exports = async function (fastify, opts) {
         } else {
           auditJSON.password = request.body.password
         }
-        await Audit.query().insert(auditJSON)
+
+        // 审计及其后续的通知不干涉当前登录请求．
+        Audit.query().insert(auditJSON).then(async insertedAudit => {
+          const corsws = await soa.get('corsws')
+          let topicSuffx = ''
+          if (_.isBoolean(auditJSON.suc)) {
+            topicSuffx = auditJSON.suc ? '_1' : '_0'
+          }
+          const baseTopic = 'audit'
+          const topic = `${baseTopic}${topicSuffx}`
+          // 反向通道可以不等待其处理完毕．不影响当前request/response.
+          corsws.update(baseTopic, { add: insertedAudit })
+          corsws.update(topic, { add: insertedAudit })
+        })
+        // console.log('insertedAudit=', insertedAudit)
       }
       // console.log('request.isAuthenticated', request.isAuthenticated())
       if (request.isAuthenticated()) {
