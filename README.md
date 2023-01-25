@@ -113,7 +113,8 @@
 
 ### Why SOA?
 &emsp;&emsp;采用SOA,是为了简化后续AI对体系结构性的设计。注意SOA风格下，体系结构的设计，不体现在代码上，而是体现在服务定义文件的不同上。对于AI而言，工作职责就是从自然语言等输入，构建服务定义的相关性，得到生成器集合，然后通过模拟函数模拟并计算目标，以完成体系结构设计。很明显，相对于分析AST中的关系，SOA带来的这种映射简化了AI的实现。对人而言，SOA做为实现风格之一，也被很多人所熟悉，算是人与机器之间，关于工作量的一个妥协。
-&emsp;&emsp;定义体系结构，就是定义服务组合。设计一个应用，首先定义其服务组合。可以将config目录下的服务定义看作体系结构定义。注意这里的服务与[micro-service](https://en.wikipedia.org/wiki/Microservices)有区别。自行查阅代码了解。
+&emsp;&emsp;定义体系结构，就是定义服务组合。设计一个应用，首先定义其服务组合。可以将config目录下的服务定义看作体系结构定义。注意这里的服务与[micro-service](https://en.wikipedia.org/wiki/Microservices)有区别。微服务属于一种特殊的服务，需要首先加载`soa.get('grpc')`获取到[grpc](https://www.npmjs.com/package/@grpc/grpc-js)服务，通过配置文件预加载到的proto,以访问各自对应的微服务．
+&emsp;&emsp;微服务的一个重要优势是对客户端的shard支持，因此，上文描述的由服务器中转的微服务不推荐使用，推荐使用[grpc-web](https://github.com/grpc/grpc-web),使用[envoy proxy](https://www.envoyproxy.io/)作为api网管，从客户端直接发起[shard](https://en.wikipedia.org/wiki/Shard_(database_architecture)式请求．
 
 ### 服务定义(SDL)
 &emsp;&emsp;一个服务定义文件，可以定义多个服务。key为服务名称，值定义如下(这通常是由一个子AI设计并配置的，只有在不满意结果时，才需要人工修改)。通过`soa.get('SRV')`获取到的服务，可以检查其`issue`来确定其实现方式。
